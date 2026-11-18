@@ -1,1 +1,15 @@
 .claude/
+
+# Node.js
+node_modules/
+npm-debug.log*
+
+# Biến môi trường
+.env
+.env.*
+
+# Trình soạn thảo & hệ điều hành
+.vscode/
+.idea/
+Thumbs.db
+.DS_Store

@@ -1,0 +1,13 @@
+{
+  "name": "dap-toi",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Mini game Đập Tôi chạy trên trình duyệt, kèm server tĩnh Node.js",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
