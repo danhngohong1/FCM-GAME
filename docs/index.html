@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mục lục — Tài liệu game Đập Tôi</title>
+<link rel="stylesheet" href="docs.css">
+</head>
+<body>
+<nav class="topnav" aria-label="Tài liệu">
+  <div class="wrap">
+    <a class="brand" href="index.html">Đập Tôi · Docs</a>
+    <a class="nav" href="index.html" aria-current="page">Mục lục</a>
+    <a class="nav" href="01-tong-quan.html">01 Tổng quan</a>
+    <a class="nav" href="02-chuc-nang.html">02 Chức năng</a>
+    <a class="nav" href="03-man-hinh.html">03 Màn hình</a>
+    <a class="nav" href="04-quy-tac-du-lieu.html">04 Quy tắc &amp; dữ liệu</a>
+    <a class="nav" href="05-ke-hoach-test.html">05 Kế hoạch test</a>
+    <a class="nav" href="06-giao-dien.html">06 Giao diện</a>
+  </div>
+</nav>
+
+<header class="page-head">
+  <div class="wrap">
+    <span class="eyebrow">Tài liệu thiết kế · v1.1</span>
+    <h1>Đập Tôi</h1>
+    <p class="lead">Mini game trên trình duyệt: 30 giây, lưới 3×3, bấm trúng mặt tôi được 1 điểm. <span class="script">Đập mạnh vào!</span></p>
+  </div>
+</header>
+
+<main class="wrap">
+  <h2>Mục lục</h2>
+  <div class="cards">
+    <a class="card" href="01-tong-quan.html"><span class="no">01</span><h3>Tổng quan</h3><p>Mục tiêu, người chơi, vòng chơi cốt lõi, phạm vi phiên bản và công nghệ.</p></a>
+    <a class="card" href="02-chuc-nang.html"><span class="no">02</span><h3>Chức năng</h3><p>Danh sách chức năng có mã số, mức ưu tiên và tiêu chí chấp nhận cho từng chức năng.</p></a>
+    <a class="card" href="03-man-hinh.html"><span class="no">03</span><h3>Màn hình</h3><p>Ba màn hình Bắt đầu, Chơi, Kết thúc: phác thảo bố cục, thành phần và luồng chuyển màn.</p></a>
+    <a class="card" href="04-quy-tac-du-lieu.html"><span class="no">04</span><h3>Quy tắc &amp; dữ liệu</h3><p>Trạng thái game, nhịp xuất hiện và chọn ô, đồng hồ, tính điểm, bảng thông số và dữ liệu lưu trữ.</p></a>
+    <a class="card" href="05-ke-hoach-test.html"><span class="no">05</span><h3>Kế hoạch test</h3><p>Môi trường, ca kiểm thử và bảng đối chiếu với 18 tiêu chí hoàn thành.</p></a>
+    <a class="card" href="06-giao-dien.html"><span class="no">06</span><h3>Giao diện</h3><p>Màu, chữ, thành phần, ba màn hình Đập Tôi 30 giây theo design/tokens.css và phong cách Pinterest.</p></a>
+  </div>
+
+  <h2>Căn cứ &amp; thay đổi</h2>
+  <p>Toàn bộ tài liệu bám theo <code>YEU-CAU.md</code> phiên bản 1.1. Bảng dưới ghi lại những gì đã đổi so với bản tài liệu trước.</p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>#</th><th>Nội dung</th><th>Hiện tại (theo YEU-CAU.md)</th><th>Bản trước</th></tr></thead>
+      <tbody>
+        <tr><td class="id">C1</td><td>Tên game &amp; nhân vật</td><td><strong>Đập Tôi</strong>; nhân vật là ảnh <code>assets/toi.png</code> (cắt từ <code>DanhNH.png</code>), 2 trạng thái: bình thường và bị đập.</td><td>Đập Lợn, lợn vẽ SVG</td></tr>
+        <tr><td class="id">C2</td><td>Thời gian một lượt</td><td><strong>30 giây</strong>, chạy ngay khi bấm “Bắt đầu”.</td><td>20 giây, sau đếm 3-2-1</td></tr>
+        <tr><td class="id">C3</td><td>Nhịp xuất hiện</td><td>Tối đa 1 nhân vật; ở trên 800 ms; nghỉ ngẫu nhiên 200–500 ms; cố định cả lượt.</td><td>3 chặng tăng dần, tối đa 2 nhân vật</td></tr>
+        <tr><td class="id">C4</td><td>Rời tab</td><td>Không tạm dừng; lượt vẫn kết thúc đúng 30 giây.</td><td>Tự tạm dừng, “Tiếp tục”</td></tr>
+        <tr><td class="id">C5</td><td>Âm thanh</td><td>Không có (ngoài phạm vi).</td><td>Web Audio + nút tắt tiếng</td></tr>
+        <tr><td class="id">C6</td><td>Màn hình</td><td>3 màn hình: Bắt đầu, Chơi, Kết thúc (chỉ có nút “Chơi lại”).</td><td>5 màn hình / lớp phủ</td></tr>
+        <tr><td class="id">C7</td><td>Giao diện</td><td>Phong cách Pinterest theo <code>design/tokens.css</code>.</td><td>Vàng sọc chéo, viền đen</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout warn">
+    <span class="eyebrow">Lưu ý</span>
+    <p>Bộ tài liệu này chỉ mô tả yêu cầu và thiết kế, chưa có code game. Giao diện tài liệu và game cùng dùng <code>design/tokens.css</code>.</p>
+  </div>
+</main>
+
+<footer class="site"><div class="wrap">Nguồn: <code>YEU-CAU.md</code> v1.1 · <code>design/tokens.css</code> · <code>DESIGN-pinterest.md</code></div></footer>
+</body>
+</html>

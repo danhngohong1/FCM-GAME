@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>03 Màn hình — Tài liệu game Đập Tôi</title>
+<link rel="stylesheet" href="docs.css">
+</head>
+<body>
+<nav class="topnav" aria-label="Tài liệu">
+  <div class="wrap">
+    <a class="brand" href="index.html">Đập Tôi · Docs</a>
+    <a class="nav" href="index.html">Mục lục</a>
+    <a class="nav" href="01-tong-quan.html">01 Tổng quan</a>
+    <a class="nav" href="02-chuc-nang.html">02 Chức năng</a>
+    <a class="nav" href="03-man-hinh.html" aria-current="page">03 Màn hình</a>
+    <a class="nav" href="04-quy-tac-du-lieu.html">04 Quy tắc &amp; dữ liệu</a>
+    <a class="nav" href="05-ke-hoach-test.html">05 Kế hoạch test</a>
+    <a class="nav" href="06-giao-dien.html">06 Giao diện</a>
+  </div>
+</nav>
+
+<header class="page-head">
+  <div class="wrap">
+    <span class="eyebrow">03 · Màn hình</span>
+    <h1>Màn hình &amp; luồng chuyển</h1>
+    <p class="lead">Ba màn hình theo <code>YEU-CAU.md</code> §4: Bắt đầu, Chơi, Kết thúc. Phác thảo bố cục và nội dung từng màn hình; màu, chữ, kích thước chi tiết ở <a href="06-giao-dien.html">trang 06</a>.</p>
+  </div>
+</header>
+
+<main class="wrap">
+  <nav class="toc" aria-label="Trong trang này">
+    <span class="eyebrow">Trong trang này</span>
+    <ol>
+      <li><a href="#danh-sach">Danh sách màn hình</a></li>
+      <li><a href="#luong">Luồng chuyển màn</a></li>
+      <li><a href="#phac-thao">Phác thảo bố cục</a></li>
+      <li><a href="#nhan-vat">Nhân vật &amp; trạng thái ô</a></li>
+      <li><a href="#chi-tiet">Thành phần từng màn hình</a></li>
+      <li><a href="#co-gian">Co giãn &amp; hướng màn hình</a></li>
+      <li><a href="#chu">Chữ hiển thị trong game</a></li>
+    </ol>
+  </nav>
+
+  <h2 id="danh-sach"><span class="num">1</span>Danh sách màn hình</h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th class="id">Mã</th><th>Tên</th><th>Loại</th><th>Chức năng liên quan</th></tr></thead>
+      <tbody>
+        <tr><td class="id">S1</td><td>Bắt đầu</td><td>Màn hình</td><td>F-01, F-09</td></tr>
+        <tr><td class="id">S2</td><td>Chơi</td><td>Màn hình</td><td>F-02 → F-06, F-10, F-11</td></tr>
+        <tr><td class="id">S3</td><td>Kết thúc</td><td>Hộp nổi trên S2 (lưới mờ phía sau)</td><td>F-07, F-08, F-09</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2 id="luong"><span class="num">2</span>Luồng chuyển màn</h2>
+  <div class="flow">
+    <span class="node">S1 Bắt đầu</span><span class="arrow">→</span><span class="node">S2 Chơi 30 s</span><span class="arrow">→</span><span class="node">S3 Kết thúc</span><span class="arrow">→ Chơi lại →</span><span class="node">S2</span>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Từ</th><th>Sự kiện</th><th>Đến</th></tr></thead>
+      <tbody>
+        <tr><td>S1</td><td>Bấm “Bắt đầu”</td><td>S2, đồng hồ chạy ngay từ 00:30</td></tr>
+        <tr><td>S2</td><td>Thời gian còn lại = 0</td><td>S3 (lưới khoá, mờ đi phía sau)</td></tr>
+        <tr><td>S3</td><td>Bấm “Chơi lại”</td><td>S2, lượt mới, đồng hồ chạy ngay</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>Không có màn hình đếm 3-2-1, không có màn hình tạm dừng. Rời tab khi đang chơi không đổi màn hình; khi quay lại, nếu đã hết giờ thì thấy S3.</p>
+
+  <h2 id="phac-thao"><span class="num">3</span>Phác thảo bố cục (điện thoại, màn hình dọc)</h2>
+  <div class="screens">
+    <figure>
+      <div class="mock">
+        <div class="bar"><span></span><span></span></div>
+        <div class="body">
+          <img class="toi" src="../assets/toi.png" alt="">
+          <div class="title">Đập Tôi</div>
+          <div class="small">Bấm trúng tôi để ghi điểm.<br>Bạn có 30 giây!</div>
+          <span class="btn">Bắt đầu</span>
+          <div class="small"><strong>Kỷ lục: 27</strong></div>
+        </div>
+      </div>
+      <figcaption class="mock-caption"><strong>S1 · Bắt đầu</strong>: một hành động chính duy nhất.</figcaption>
+    </figure>
+
+    <figure>
+      <div class="mock">
+        <div class="bar"><span>Điểm: 12</span><span>⏱ 00:18</span></div>
+        <div class="body">
+          <div class="grid">
+            <div class="cell"></div><div class="cell up"><img class="toi" src="../assets/toi.png" alt=""></div><div class="cell"></div>
+            <div class="cell"></div><div class="cell"></div><div class="cell"></div>
+            <div class="cell"></div><div class="cell"></div><div class="cell"></div>
+          </div>
+        </div>
+      </div>
+      <figcaption class="mock-caption"><strong>S2 · Chơi</strong>: điểm bên trái, đồng hồ bên phải; một nhân vật đang ló lên ở ô 1.</figcaption>
+    </figure>
+
+    <figure>
+      <div class="mock">
+        <div class="bar"><span>Điểm: 25</span><span class="danger">⏱ 00:04</span></div>
+        <div class="body">
+          <div class="grid">
+            <div class="cell"></div><div class="cell"></div><div class="cell"></div>
+            <div class="cell"></div><div class="cell"></div><div class="cell"></div>
+            <div class="cell hit"><span class="plus">+1</span><img class="toi hit" src="../assets/toi.png" alt=""></div><div class="cell"></div><div class="cell"></div>
+          </div>
+        </div>
+      </div>
+      <figcaption class="mock-caption"><strong>S2 · Chơi, ≤ 5 giây</strong>: đồng hồ đỏ; nhân vật ở ô 6 vừa bị đập, “+1” bay lên.</figcaption>
+    </figure>
+
+    <figure>
+      <div class="mock">
+        <div class="bar"><span>Điểm: 31</span><span>⏱ 00:00</span></div>
+        <div class="body" style="opacity:.4">
+          <div class="grid">
+            <div class="cell"></div><div class="cell"></div><div class="cell"></div>
+            <div class="cell"></div><div class="cell"></div><div class="cell"></div>
+            <div class="cell"></div><div class="cell"></div><div class="cell"></div>
+          </div>
+        </div>
+        <div class="overlay"><div class="modal">
+          <div class="title">Hết giờ!</div>
+          <div class="small">Điểm của bạn</div>
+          <div class="big">31</div>
+          <span class="pill">★ Kỷ lục mới!</span>
+          <div class="small">Kỷ lục: 31</div>
+          <span class="btn">Chơi lại</span>
+        </div></div>
+      </div>
+      <figcaption class="mock-caption"><strong>S3 · Kết thúc</strong>: hộp kết quả trên lưới đã mờ; nhãn “Kỷ lục mới!” chỉ hiện khi phá kỷ lục.</figcaption>
+    </figure>
+  </div>
+
+  <h2 id="nhan-vat"><span class="num">4</span>Nhân vật &amp; trạng thái ô</h2>
+  <div class="cards">
+    <div class="card" style="text-align:center"><img class="toi" src="../assets/toi.png" alt=""><h3>Bình thường</h3><p>Trạng thái <code>UP</code>. Ảnh gốc <code>assets/toi.png</code>, đang cười.</p></div>
+    <div class="card" style="text-align:center"><img class="toi hit" src="../assets/toi.png" alt=""><h3>Bị đập</h3><p>Hiệu ứng sau khi trúng. Ảnh bẹp 12%, nghiêng −8°, ngả xám nhẹ, có sao choáng.</p></div>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Trạng thái ô</th><th>Hình ảnh</th><th>Bấm vào thì</th></tr></thead>
+      <tbody>
+        <tr><td><code>EMPTY</code></td><td>Ô nền kem <code>--color-surface-card</code>, miệng hang <code>--color-stone</code>.</td><td>Không đổi điểm</td></tr>
+        <tr><td><code>UP</code></td><td>Nền ô đậm hơn một nấc <code>--color-secondary-bg</code>; nhân vật trượt lên từ miệng hang trong 120 ms, ở trên 800 ms.</td><td>+1 điểm, ô về <code>EMPTY</code> ngay về logic</td></tr>
+        <tr><td>Hiệu ứng bị đập</td><td>Nền <code>--color-success-pale</code>; ảnh “bị đập”; “+1” màu <code>--color-success-deep</code> bay lên và mờ dần trong 300 ms.</td><td>Không đổi điểm</td></tr>
+        <tr><td>Hết giờ</td><td>Toàn lưới mờ 40% phía sau hộp kết quả.</td><td>Bỏ qua</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2 id="chi-tiet"><span class="num">5</span>Thành phần từng màn hình</h2>
+
+  <h3>S1 · Bắt đầu</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Thành phần</th><th>Mô tả</th><th>Token</th></tr></thead>
+    <tbody>
+      <tr><td>Nền</td><td>Trắng ngà phẳng, không hoạ tiết</td><td><code>--color-surface-soft</code></td></tr>
+      <tr><td>Ảnh nhân vật</td><td><code>assets/toi.png</code>, cao khoảng 120 px</td><td>—</td></tr>
+      <tr><td>Tiêu đề “Đập Tôi”</td><td>Chữ lớn, đậm, giãn chữ âm</td><td><code>--size-display-lg</code>, <code>--weight-bold</code>, <code>--tracking-display-lg</code></td></tr>
+      <tr><td>Luật chơi</td><td>“Bấm trúng tôi để ghi điểm. Bạn có 30 giây!”</td><td><code>--size-body-md</code>, <code>--color-body</code></td></tr>
+      <tr><td>Nút “Bắt đầu”</td><td>Nút chính màu đỏ, nút đỏ duy nhất trên màn hình, nhận focus tự động</td><td><code>--color-primary</code>, <code>--radius-md</code>, <code>--focus-ring</code></td></tr>
+      <tr><td>Kỷ lục</td><td>“Kỷ lục: N”, ẩn khi N = 0</td><td><code>--size-body-sm</code>, <code>--weight-bold</code></td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>S2 · Chơi</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Thành phần</th><th>Mô tả</th></tr></thead>
+    <tbody>
+      <tr><td>Thanh trạng thái</td><td>Nền trắng, kẻ mảnh dưới. Trái: “Điểm: N”. Phải: “⏱ 00:SS”; còn ≤ 5 giây chuyển màu <code>--color-primary</code>.</td></tr>
+      <tr><td>Lưới 3×3</td><td>9 ô vuông, khe <code>--space-sm</code>, bo <code>--radius-md</code>, không viền, không bóng; mỗi ô ≥ 64×64 px.</td></tr>
+      <tr><td>Nhân vật</td><td>Tối đa 1 ảnh trên lưới tại một thời điểm.</td></tr>
+      <tr><td>“+1”</td><td>Chữ đậm màu <code>--color-success-deep</code>, bay lên 24 px và mờ dần trong 300 ms.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>S3 · Kết thúc</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Thành phần</th><th>Mô tả</th></tr></thead>
+    <tbody>
+      <tr><td>Lớp phủ</td><td>Đen 50% (<code>--scrim</code>) phủ khu vực chơi; lưới phía sau mờ đi.</td></tr>
+      <tr><td>Hộp kết quả</td><td>Thẻ trắng bo <code>--radius-lg</code>, bóng <code>--shadow-modal</code>, lề trong 32 px.</td></tr>
+      <tr><td>Tiêu đề</td><td>“Hết giờ!”</td></tr>
+      <tr><td>Điểm</td><td>“Điểm của bạn” và số điểm rất lớn màu đen.</td></tr>
+      <tr><td>Nhãn kỷ lục mới</td><td>“★ Kỷ lục mới!” nền <code>--color-success-pale</code>; chỉ hiện khi phá kỷ lục.</td></tr>
+      <tr><td>Kỷ lục</td><td>“Kỷ lục: M” (đã cập nhật).</td></tr>
+      <tr><td>Nút</td><td>Một nút “Chơi lại” màu đỏ, nhận focus tự động.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2 id="co-gian"><span class="num">6</span>Co giãn &amp; hướng màn hình</h2>
+  <ul>
+    <li><strong>320–480 px:</strong> lề 16 px; lưới rộng hết phần còn lại, mỗi ô ≥ 90 px.</li>
+    <li><strong>481–768 px:</strong> lưới tối đa 420 px, căn giữa.</li>
+    <li><strong>&gt; 768 px:</strong> bàn chơi trong khung trắng bo 32 px, rộng tối đa 480 px, căn giữa.</li>
+    <li><strong>Màn hình thấp (ngang):</strong> lưới co theo chiều cao, không cuộn trang.</li>
+    <li>Mọi ô ≥ 64×64 px, nút có vùng chạm ≥ 44×44 px; không cuộn ngang từ 320 px đến 1920 px.</li>
+  </ul>
+
+  <h2 id="chu"><span class="num">7</span>Chữ hiển thị trong game</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Vị trí</th><th>Nội dung</th></tr></thead>
+    <tbody>
+      <tr><td>S1 tiêu đề</td><td>Đập Tôi</td></tr>
+      <tr><td>S1 luật chơi</td><td>Bấm trúng tôi để ghi điểm. Bạn có 30 giây!</td></tr>
+      <tr><td>S1 nút</td><td>Bắt đầu</td></tr>
+      <tr><td>S1 / S3 kỷ lục</td><td>Kỷ lục: {N}</td></tr>
+      <tr><td>S2 thanh trạng thái</td><td>Điểm: {N} · ⏱ 00:{SS}</td></tr>
+      <tr><td>S2 khi trúng</td><td>+1</td></tr>
+      <tr><td>S3</td><td>Hết giờ! · Điểm của bạn · {N} · ★ Kỷ lục mới! · Kỷ lục: {M} · Chơi lại</td></tr>
+      <tr><td>Ô có nhân vật (aria-label)</td><td>Có nhân vật</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="pager">
+    <a href="02-chuc-nang.html"><small>← Trước</small>02 Chức năng</a>
+    <a class="next" href="04-quy-tac-du-lieu.html"><small>Tiếp →</small>04 Quy tắc &amp; dữ liệu</a>
+  </div>
+</main>
+
+<footer class="site"><div class="wrap">Tài liệu game Đập Tôi · 03 Màn hình</div></footer>
+</body>
+</html>

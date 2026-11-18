@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>02 Chức năng — Tài liệu game Đập Tôi</title>
+<link rel="stylesheet" href="docs.css">
+</head>
+<body>
+<nav class="topnav" aria-label="Tài liệu">
+  <div class="wrap">
+    <a class="brand" href="index.html">Đập Tôi · Docs</a>
+    <a class="nav" href="index.html">Mục lục</a>
+    <a class="nav" href="01-tong-quan.html">01 Tổng quan</a>
+    <a class="nav" href="02-chuc-nang.html" aria-current="page">02 Chức năng</a>
+    <a class="nav" href="03-man-hinh.html">03 Màn hình</a>
+    <a class="nav" href="04-quy-tac-du-lieu.html">04 Quy tắc &amp; dữ liệu</a>
+    <a class="nav" href="05-ke-hoach-test.html">05 Kế hoạch test</a>
+    <a class="nav" href="06-giao-dien.html">06 Giao diện</a>
+  </div>
+</nav>
+
+<header class="page-head">
+  <div class="wrap">
+    <span class="eyebrow">02 · Chức năng</span>
+    <h1>Danh sách chức năng</h1>
+    <p class="lead">Mỗi chức năng có mã số để tham chiếu từ kế hoạch test, mức ưu tiên và tiêu chí chấp nhận. Mọi chức năng lấy từ <code>YEU-CAU.md</code> (YC); “DoD n” là mục thứ n trong danh sách tiêu chí hoàn thành ở YC §7.</p>
+  </div>
+</header>
+
+<main class="wrap">
+  <nav class="toc" aria-label="Trong trang này">
+    <span class="eyebrow">Trong trang này</span>
+    <ol>
+      <li><a href="#uu-tien">Mức ưu tiên</a></li>
+      <li><a href="#tong-hop">Bảng tổng hợp</a></li>
+      <li><a href="#chi-tiet">Chi tiết chức năng</a></li>
+      <li><a href="#phi-chuc-nang">Yêu cầu phi chức năng</a></li>
+    </ol>
+  </nav>
+
+  <h2 id="uu-tien"><span class="num">1</span>Mức ưu tiên</h2>
+  <p><span class="tag must">Bắt buộc</span> có trong YC, thiếu thì chưa hoàn thành. <span class="tag">Tuỳ chọn</span> YC ghi “không bắt buộc”, làm nếu còn thời gian.</p>
+
+  <h2 id="tong-hop"><span class="num">2</span>Bảng tổng hợp</h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th class="id">Mã</th><th>Chức năng</th><th>Ưu tiên</th><th>Nguồn</th></tr></thead>
+      <tbody>
+        <tr><td class="id">F-01</td><td>Màn hình Bắt đầu &amp; bắt đầu lượt</td><td><span class="tag must">Bắt buộc</span></td><td>YC §2.2, §4.1 · DoD 2, 3</td></tr>
+        <tr><td class="id">F-02</td><td>Lưới 3×3</td><td><span class="tag must">Bắt buộc</span></td><td>YC §2.1 · DoD 4</td></tr>
+        <tr><td class="id">F-03</td><td>Nhân vật xuất hiện ngẫu nhiên</td><td><span class="tag must">Bắt buộc</span></td><td>YC §2.3–2.6 · DoD 5, 6</td></tr>
+        <tr><td class="id">F-04</td><td>Đập tôi và tính điểm</td><td><span class="tag must">Bắt buộc</span></td><td>YC §2.7–2.9, §3 · DoD 7, 8</td></tr>
+        <tr><td class="id">F-05</td><td>Đồng hồ đếm ngược 30 giây</td><td><span class="tag must">Bắt buộc</span></td><td>YC §2.2, §4.2 · DoD 3, 9, 16</td></tr>
+        <tr><td class="id">F-06</td><td>Kết thúc lượt khi hết giờ</td><td><span class="tag must">Bắt buộc</span></td><td>YC §2.10 · DoD 10</td></tr>
+        <tr><td class="id">F-07</td><td>Màn hình Kết thúc</td><td><span class="tag must">Bắt buộc</span></td><td>YC §4.3 · DoD 10</td></tr>
+        <tr><td class="id">F-08</td><td>Chơi lại</td><td><span class="tag must">Bắt buộc</span></td><td>YC §2.11, §4.3 · DoD 12</td></tr>
+        <tr><td class="id">F-09</td><td>Kỷ lục lưu trong trình duyệt</td><td><span class="tag must">Bắt buộc</span></td><td>YC §3 · DoD 11</td></tr>
+        <tr><td class="id">F-10</td><td>Hiệu ứng trồi lên / bị đập / “+1”</td><td><span class="tag must">Bắt buộc</span></td><td>YC §4.2 · DoD 7</td></tr>
+        <tr><td class="id">F-11</td><td>Con trỏ hình búa trên desktop</td><td><span class="tag">Tuỳ chọn</span></td><td>YC §4.2</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2 id="chi-tiet"><span class="num">3</span>Chi tiết chức năng</h2>
+
+  <h3 id="f01">F-01 · Màn hình Bắt đầu &amp; bắt đầu lượt</h3>
+  <ul>
+    <li>Màn hình Bắt đầu hiện: ảnh nhân vật, tên game “Đập Tôi”, luật ngắn “Bấm trúng tôi để ghi điểm. Bạn có 30 giây!”, dòng “Kỷ lục: N” và nút “Bắt đầu”.</li>
+    <li>Dòng kỷ lục ẩn khi chưa có kỷ lục (N = 0).</li>
+    <li>Bấm “Bắt đầu”: khởi tạo lượt mới (điểm = 0, thời gian = 30 giây, lưới trống), chuyển sang màn hình Chơi và <strong>đồng hồ chạy ngay</strong>, không đếm 3-2-1.</li>
+    <li>Nút chỉ nhận 1 lần bấm: bấm liên tục nhiều lần không tạo nhiều lượt hay nhiều bộ đếm giờ.</li>
+  </ul>
+
+  <h3 id="f02">F-02 · Lưới 3×3</h3>
+  <ul>
+    <li>Luôn có đúng 9 ô, xếp 3 hàng × 3 cột, các ô hình vuông bằng nhau.</li>
+    <li>Mỗi ô tối thiểu 64×64 px; lưới nằm gọn trong màn hình từ 320 px trở lên, không cuộn ngang.</li>
+    <li>Mỗi ô là một hang; nhân vật trồi lên từ miệng hang ở đáy ô.</li>
+  </ul>
+
+  <h3 id="f03">F-03 · Nhân vật xuất hiện ngẫu nhiên</h3>
+  <ul>
+    <li>Tại mọi thời điểm có <strong>tối đa 1</strong> nhân vật trên lưới.</li>
+    <li>Nhân vật ở trên mặt đất <strong>800 ms</strong> rồi tự chui xuống nếu không bị đập.</li>
+    <li>Sau khi nhân vật chui xuống hoặc bị đập, chờ khoảng nghỉ ngẫu nhiên <strong>200–500 ms</strong> rồi nhân vật mới xuất hiện.</li>
+    <li>Ô của lần xuất hiện tiếp theo <strong>không trùng</strong> với ô vừa xuất hiện liền trước; chọn ngẫu nhiên đều trong 8 ô còn lại.</li>
+    <li>Nhịp này giữ nguyên suốt 30 giây (không tăng tốc).</li>
+  </ul>
+
+  <h3 id="f04">F-04 · Đập tôi và tính điểm</h3>
+  <ul>
+    <li>Bấm hoặc chạm vào ô có nhân vật đang <code>UP</code>: <strong>+1 điểm</strong> ngay, nhân vật biến mất ngay (chuyển sang hiệu ứng “bị đập”, không bấm được nữa).</li>
+    <li>Bấm vào ô trống, bấm khi nhân vật đã chui xuống, bấm lần 2 trở đi vào cùng một nhân vật: không cộng, không trừ, không báo lỗi.</li>
+    <li>Mỗi lần xuất hiện chỉ được tính tối đa 1 điểm.</li>
+    <li>Thao tác được tính theo ô nằm dưới điểm chạm; không “click xuyên” sang ô bên cạnh.</li>
+    <li>Điểm bắt đầu từ 0 mỗi lượt, là số nguyên ≥ 0, không bao giờ âm.</li>
+  </ul>
+
+  <h3 id="f05">F-05 · Đồng hồ đếm ngược 30 giây</h3>
+  <ul>
+    <li>Hiển thị thời gian còn lại dạng “⏱ 00:SS”, đếm từ 00:30 về 00:00 (số giây làm tròn lên).</li>
+    <li>Thời gian tính theo mốc kết thúc (<code>performance.now()</code>), không cộng dồn từng tick, nên không bị trôi khi máy chậm hoặc khi chuyển tab.</li>
+    <li>Lượt kết thúc đúng 30 giây, sai số ≤ 0,5 giây, <strong>kể cả khi chuyển tab rồi quay lại</strong> (không tạm dừng).</li>
+    <li>Còn ≤ 5 giây: chữ đồng hồ chuyển màu đỏ <code>--color-primary</code>.</li>
+  </ul>
+
+  <h3 id="f06">F-06 · Kết thúc lượt khi hết giờ</h3>
+  <ul>
+    <li>Khi thời gian còn lại về 0: huỷ mọi bộ hẹn giờ, nhân vật đang hiện (nếu có) biến mất ngay, không sinh nhân vật mới.</li>
+    <li>Mọi thao tác bấm trên lưới sau thời điểm hết giờ bị bỏ qua, kể cả bấm trúng ảnh còn đang trượt xuống.</li>
+    <li>Cập nhật kỷ lục (F-09) rồi hiện màn hình Kết thúc.</li>
+  </ul>
+
+  <h3 id="f07">F-07 · Màn hình Kết thúc</h3>
+  <ul>
+    <li>Hiện tiêu đề “Hết giờ!”, “Điểm của bạn: N”, “Kỷ lục: M”.</li>
+    <li>Nếu điểm lượt này lớn hơn kỷ lục cũ: hiện thêm nhãn “Kỷ lục mới!”.</li>
+    <li>Có một nút duy nhất “Chơi lại”. Không có nút về màn hình Bắt đầu.</li>
+    <li>Hiện dạng hộp nổi trên lưới đã mờ đi (xem <a href="03-man-hinh.html">trang 03</a>).</li>
+  </ul>
+
+  <h3 id="f08">F-08 · Chơi lại</h3>
+  <ul>
+    <li>Bấm “Chơi lại”: vào thẳng lượt mới với điểm = 0, thời gian = 30, lưới trống; đồng hồ chạy ngay.</li>
+    <li>Trước khi khởi tạo lượt mới phải huỷ toàn bộ hẹn giờ và khung hình của lượt cũ. Bấm “Chơi lại” nhiều lần thật nhanh không làm đồng hồ chạy nhanh gấp đôi.</li>
+    <li>Chơi liên tiếp nhiều lượt không tích luỹ bộ hẹn giờ hay trình nghe sự kiện; lượt nào cũng có nhịp giống lượt đầu.</li>
+  </ul>
+
+  <h3 id="f09">F-09 · Kỷ lục lưu trong trình duyệt</h3>
+  <ul>
+    <li>Lưu trong <code>localStorage</code>; tải lại trang hoặc đóng trình duyệt mở lại vẫn còn.</li>
+    <li>Chỉ cập nhật khi điểm lượt này <strong>lớn hơn hẳn</strong> kỷ lục cũ; bằng thì không tính kỷ lục mới.</li>
+    <li>Hiện ở màn hình Bắt đầu và màn hình Kết thúc.</li>
+    <li>Nếu trình duyệt không cho dùng <code>localStorage</code>: game vẫn chơi bình thường, chỉ không lưu kỷ lục qua lần tải trang.</li>
+    <li>Dữ liệu hỏng (không phải số nguyên ≥ 0) thì coi như kỷ lục = 0.</li>
+  </ul>
+
+  <h3 id="f10">F-10 · Hiệu ứng trồi lên / bị đập / “+1”</h3>
+  <ul>
+    <li>Nhân vật trồi lên và chui xuống bằng chuyển động trượt dọc khoảng 120 ms.</li>
+    <li>Khi đập trúng: ảnh chuyển sang trạng thái “bị đập” (bẹp, nghiêng, sao choáng), ô đổi nền xanh nhạt, chữ “+1” bay lên rồi mờ dần trong khoảng 300 ms.</li>
+    <li>Hiệu ứng chỉ là hình ảnh: về logic, nhân vật đã biến mất ngay lúc bị đập và khoảng nghỉ bắt đầu tính từ lúc đó.</li>
+    <li>Nếu hệ điều hành bật giảm chuyển động (<code>prefers-reduced-motion</code>): bỏ trượt và bay, chỉ đổi hình.</li>
+  </ul>
+
+  <h3 id="f11">F-11 · Con trỏ hình búa trên desktop <span class="tag">Tuỳ chọn</span></h3>
+  <ul>
+    <li>Khi dùng chuột, con trỏ trên lưới đổi thành hình cái búa (SVG đen một màu, 32 px). Trên điện thoại không áp dụng.</li>
+  </ul>
+
+  <h2 id="phi-chuc-nang"><span class="num">4</span>Yêu cầu phi chức năng</h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th class="id">Mã</th><th>Yêu cầu</th><th>Tiêu chí</th></tr></thead>
+      <tbody>
+        <tr><td class="id">NF-01</td><td>Chạy không cần server</td><td>Mở trực tiếp <code>index.html</code> là chơi được; không lỗi trong Console (DoD 1).</td></tr>
+        <tr><td class="id">NF-02</td><td>Tương thích</td><td>Chrome, Edge, Firefox bản mới nhất trên máy tính; Safari và Chrome trên điện thoại (DoD 13).</td></tr>
+        <tr><td class="id">NF-03</td><td>Co giãn</td><td>Hiển thị gọn từ 320 px đến 1920 px, không có thanh cuộn ngang (DoD 14).</td></tr>
+        <tr><td class="id">NF-04</td><td>Cảm ứng</td><td>Chạm nhanh không phóng to trang, không bôi đen chữ, không có độ trễ bấm đáng kể (DoD 15).</td></tr>
+        <tr><td class="id">NF-05</td><td>Thông số tập trung</td><td>Thời gian lượt, thời gian nhân vật ở trên, khoảng nghỉ, điểm mỗi lần trúng, kích thước lưới nằm ở một chỗ (DoD 17).</td></tr>
+        <tr><td class="id">NF-06</td><td>Không thư viện ngoài</td><td>Chỉ HTML, CSS, JavaScript thuần (DoD 18).</td></tr>
+        <tr><td class="id">NF-07</td><td>Trợ năng</td><td>Nút và ô là thẻ <code>&lt;button&gt;</code>, dùng được bằng bàn phím; tương phản chữ đạt WCAG AA.</td></tr>
+        <tr><td class="id">NF-08</td><td>Ngôn ngữ</td><td>Toàn bộ chữ trong game là tiếng Việt có dấu.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="pager">
+    <a href="01-tong-quan.html"><small>← Trước</small>01 Tổng quan</a>
+    <a class="next" href="03-man-hinh.html"><small>Tiếp →</small>03 Màn hình</a>
+  </div>
+</main>
+
+<footer class="site"><div class="wrap">Tài liệu game Đập Tôi · 02 Chức năng</div></footer>
+</body>
+</html>

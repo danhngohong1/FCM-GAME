@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>04 Quy tắc &amp; dữ liệu — Tài liệu game Đập Tôi</title>
+<link rel="stylesheet" href="docs.css">
+</head>
+<body>
+<nav class="topnav" aria-label="Tài liệu">
+  <div class="wrap">
+    <a class="brand" href="index.html">Đập Tôi · Docs</a>
+    <a class="nav" href="index.html">Mục lục</a>
+    <a class="nav" href="01-tong-quan.html">01 Tổng quan</a>
+    <a class="nav" href="02-chuc-nang.html">02 Chức năng</a>
+    <a class="nav" href="03-man-hinh.html">03 Màn hình</a>
+    <a class="nav" href="04-quy-tac-du-lieu.html" aria-current="page">04 Quy tắc &amp; dữ liệu</a>
+    <a class="nav" href="05-ke-hoach-test.html">05 Kế hoạch test</a>
+    <a class="nav" href="06-giao-dien.html">06 Giao diện</a>
+  </div>
+</nav>
+
+<header class="page-head">
+  <div class="wrap">
+    <span class="eyebrow">04 · Quy tắc &amp; dữ liệu</span>
+    <h1>Quy tắc game &amp; dữ liệu</h1>
+    <p class="lead">Mô tả chính xác cách game vận hành: trạng thái, chọn ô, nhịp xuất hiện, đồng hồ, tính điểm và dữ liệu lưu trữ. Đây là căn cứ khi viết code và khi test.</p>
+  </div>
+</header>
+
+<main class="wrap">
+  <nav class="toc" aria-label="Trong trang này">
+    <span class="eyebrow">Trong trang này</span>
+    <ol>
+      <li><a href="#trang-thai-game">Trạng thái game</a></li>
+      <li><a href="#trang-thai-o">Trạng thái ô</a></li>
+      <li><a href="#nhip">Nhịp xuất hiện &amp; chọn ô</a></li>
+      <li><a href="#dong-ho">Đồng hồ</a></li>
+      <li><a href="#tinh-diem">Tính điểm</a></li>
+      <li><a href="#roi-tab">Khi rời tab</a></li>
+      <li><a href="#luu-tru">Dữ liệu lưu trữ</a></li>
+      <li><a href="#runtime">Dữ liệu trong lượt chơi</a></li>
+      <li><a href="#hang-so">Bảng thông số</a></li>
+      <li><a href="#bien">Tình huống biên</a></li>
+    </ol>
+  </nav>
+
+  <h2 id="trang-thai-game"><span class="num">1</span>Trạng thái game</h2>
+  <p>Tại mọi thời điểm, game ở đúng <strong>một</strong> trong ba trạng thái. Mọi thao tác không hợp lệ với trạng thái hiện tại đều bị bỏ qua.</p>
+  <div class="flow">
+    <span class="node">IDLE</span><span class="arrow">→</span><span class="node">PLAYING</span><span class="arrow">→</span><span class="node">RESULT</span><span class="arrow">→ Chơi lại →</span><span class="node">PLAYING</span>
+  </div>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Trạng thái</th><th>Màn hình</th><th>Đồng hồ</th><th>Sinh nhân vật</th><th>Lưới nhận thao tác</th></tr></thead>
+    <tbody>
+      <tr><td><code>IDLE</code></td><td>S1 Bắt đầu</td><td>—</td><td>Không</td><td>—</td></tr>
+      <tr><td><code>PLAYING</code></td><td>S2 Chơi</td><td>Chạy</td><td>Có</td><td>Có</td></tr>
+      <tr><td><code>RESULT</code></td><td>S3 Kết thúc (trên S2)</td><td>= 0</td><td>Không</td><td>Không</td></tr>
+    </tbody>
+  </table></div>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Từ</th><th>Sự kiện</th><th>Đến</th><th>Việc phải làm</th></tr></thead>
+    <tbody>
+      <tr><td>IDLE</td><td>Bấm “Bắt đầu”</td><td>PLAYING</td><td>Khởi tạo lượt (mục 8): <code>endAt = now + 30 000</code>; hẹn lần xuất hiện đầu tiên sau một khoảng nghỉ ngẫu nhiên.</td></tr>
+      <tr><td>PLAYING</td><td>Thời gian còn lại ≤ 0</td><td>RESULT</td><td>Huỷ mọi hẹn giờ, xoá nhân vật, khoá lưới, cập nhật kỷ lục, hiện S3.</td></tr>
+      <tr><td>RESULT</td><td>Bấm “Chơi lại”</td><td>PLAYING</td><td>Huỷ mọi thứ còn sót của lượt cũ rồi khởi tạo lượt mới như trên.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2 id="trang-thai-o"><span class="num">2</span>Trạng thái ô</h2>
+  <div class="flow">
+    <span class="node">EMPTY</span><span class="arrow">→ xuất hiện →</span><span class="node">UP</span><span class="arrow">→ bị đập hoặc hết 800 ms →</span><span class="node">EMPTY</span>
+  </div>
+  <ul>
+    <li>Về logic chỉ có 2 trạng thái: <code>EMPTY</code> và <code>UP</code>. Hiệu ứng “bị đập” và hoạt ảnh chui xuống là phần hình ảnh, không làm ô bận.</li>
+    <li><code>UP</code> → <code>EMPTY</code> khi: bị đập (ngay lập tức) hoặc hết <code>UP_MS</code> = 800 ms.</li>
+    <li>Ô <code>UP</code> có đúng 1 hẹn giờ “hết thời gian hiện”; khi bị đập phải huỷ hẹn giờ này.</li>
+    <li>Vì tối đa 1 nhân vật, tại mọi thời điểm có tối đa 1 ô ở <code>UP</code>.</li>
+  </ul>
+
+  <h2 id="nhip"><span class="num">3</span>Nhịp xuất hiện &amp; chọn ô</h2>
+  <h3>3.1 Khi nào xuất hiện</h3>
+  <ol>
+    <li>Khi lượt bắt đầu: hẹn lần xuất hiện đầu tiên sau khoảng nghỉ ngẫu nhiên.</li>
+    <li>Mỗi khi ô <code>UP</code> trở về <code>EMPTY</code> (bị đập hoặc hết 800 ms): hẹn lần xuất hiện tiếp theo sau khoảng nghỉ ngẫu nhiên.</li>
+    <li>Khoảng nghỉ = số ngẫu nhiên đều trong [<code>GAP_MIN_MS</code>, <code>GAP_MAX_MS</code>] = [200, 500] ms, lấy mới cho mỗi lần.</li>
+    <li>Luôn có tối đa <strong>một</strong> lịch hẹn “xuất hiện” đang chờ; khi lịch hẹn chạy mà game không còn ở <code>PLAYING</code> thì bỏ qua.</li>
+    <li>Nhịp này cố định suốt 30 giây, không tăng tốc.</li>
+  </ol>
+  <h3>3.2 Chọn ô</h3>
+  <ol>
+    <li>Tập ứng viên = 9 ô trừ ô của lần xuất hiện ngay trước (<code>lastCell</code>). Lần đầu tiên: cả 9 ô.</li>
+    <li>Chọn ngẫu nhiên đều một ô trong tập ứng viên (8 hoặc 9 ô).</li>
+    <li>Ghi ô vừa chọn vào <code>lastCell</code>.</li>
+  </ol>
+  <p>Mỗi lần xuất hiện có một mã tăng dần (<code>spawnId</code>). Hẹn giờ “hết thời gian hiện” kèm mã này; khi chạy mà mã đã khác thì bỏ qua, nhờ vậy không có hẹn giờ cũ nào xoá nhầm lần xuất hiện mới.</p>
+
+  <h2 id="dong-ho"><span class="num">4</span>Đồng hồ</h2>
+  <ul>
+    <li>Thời lượng lượt: <strong><code>ROUND_MS</code> = 30 000 ms</strong>, bắt đầu ngay khi bấm “Bắt đầu” / “Chơi lại”.</li>
+    <li>Khi vào <code>PLAYING</code>: <code>endAt = performance.now() + ROUND_MS</code>.</li>
+    <li>Mỗi khung hình (<code>requestAnimationFrame</code>): <code>remainingMs = max(0, endAt − now)</code>.</li>
+    <li>Hiển thị “⏱ 00:SS” với <code>SS = ceil(remainingMs / 1000)</code>, có số 0 đứng trước: hiện 00:30 lúc bắt đầu, về 00:00 đúng lúc hết giờ.</li>
+    <li>Khi <code>remainingMs</code> = 0, chuyển ngay sang <code>RESULT</code> trong cùng khung hình.</li>
+    <li>Cảnh báo (chữ đỏ) khi <code>SS ≤ WARN_SECONDS</code> = 5.</li>
+  </ul>
+
+  <h2 id="tinh-diem"><span class="num">5</span>Tính điểm</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Tình huống khi bấm vào ô</th><th>Kết quả</th></tr></thead>
+    <tbody>
+      <tr><td>Game <code>PLAYING</code>, ô <code>UP</code>, <code>now &lt; endAt</code></td><td><code>score += POINTS_PER_HIT</code> (= 1), ô → <code>EMPTY</code>, huỷ hẹn giờ hết thời gian hiện, chạy hiệu ứng “bị đập” và “+1”, hẹn lần xuất hiện tiếp theo</td></tr>
+      <tr><td>Ô <code>EMPTY</code> (kể cả khi ảnh “bị đập” hoặc ảnh đang chui xuống vẫn còn trên màn hình)</td><td>Không đổi</td></tr>
+      <tr><td>Game không ở <code>PLAYING</code></td><td>Không đổi</td></tr>
+      <tr><td><code>now ≥ endAt</code> (dù khung hình chưa kịp chuyển màn)</td><td>Không đổi, chuyển sang <code>RESULT</code></td></tr>
+    </tbody>
+  </table></div>
+  <ul>
+    <li>Nhận thao tác bằng <code>pointerdown</code> trên chính ô đó (không dùng <code>click</code>, để giảm độ trễ và tránh tính 2 lần).</li>
+    <li>Điểm là số nguyên ≥ 0, chỉ tăng; không có trừ điểm.</li>
+    <li>Ô về <code>EMPTY</code> ngay khi trúng nên mọi lần bấm tiếp theo vào cùng nhân vật đều bị bỏ qua.</li>
+  </ul>
+
+  <h2 id="roi-tab"><span class="num">6</span>Khi rời tab</h2>
+  <ul>
+    <li>Game <strong>không tạm dừng</strong>. Đồng hồ tính theo <code>endAt</code> nên thời gian vẫn trôi đúng khi tab bị ẩn.</li>
+    <li>Trình duyệt có thể làm chậm hẹn giờ ở tab ẩn; điều này chỉ ảnh hưởng nhịp xuất hiện, không ảnh hưởng thời điểm kết thúc.</li>
+    <li>Khi quay lại tab: khung hình đầu tiên tính lại <code>remainingMs</code>; nếu đã ≤ 0 thì chuyển ngay sang <code>RESULT</code> với điểm đã đạt.</li>
+  </ul>
+
+  <h2 id="luu-tru"><span class="num">7</span>Dữ liệu lưu trữ (<code>localStorage</code>)</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Khoá</th><th>Kiểu (lưu dạng chuỗi)</th><th>Mặc định</th><th>Ghi khi</th><th>Kiểm tra khi đọc</th></tr></thead>
+    <tbody>
+      <tr><td><code>dapToi.highScore</code></td><td>Số nguyên ≥ 0, ví dụ <code>"27"</code></td><td>0</td><td>Kết thúc lượt và điểm &gt; kỷ lục cũ</td><td>Không phải số nguyên ≥ 0 hoặc &gt; 9999 thì coi là 0</td></tr>
+    </tbody>
+  </table></div>
+  <ul>
+    <li>Mọi thao tác đọc/ghi đặt trong <code>try/catch</code>. Nếu lỗi, dùng giá trị trong bộ nhớ và không hiện lỗi cho người chơi.</li>
+    <li>Kỷ lục mới khi <code>score &gt; highScore</code> (lớn hơn hẳn; bằng thì không tính).</li>
+    <li>Không lưu thông tin cá nhân nào.</li>
+  </ul>
+
+  <h2 id="runtime"><span class="num">8</span>Dữ liệu trong lượt chơi</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Trường</th><th>Kiểu</th><th>Giá trị khi khởi tạo lượt</th><th>Ý nghĩa</th></tr></thead>
+    <tbody>
+      <tr><td><code>state</code></td><td>chuỗi</td><td><code>"PLAYING"</code></td><td>Trạng thái game (mục 1)</td></tr>
+      <tr><td><code>score</code></td><td>số nguyên</td><td>0</td><td>Điểm lượt hiện tại</td></tr>
+      <tr><td><code>endAt</code></td><td>số</td><td><code>now + 30000</code></td><td>Mốc kết thúc theo <code>performance.now()</code></td></tr>
+      <tr><td><code>remainingMs</code></td><td>số</td><td>30000</td><td>Thời gian còn lại, cập nhật mỗi khung hình</td></tr>
+      <tr><td><code>activeCell</code></td><td>số 0–8 | null</td><td>null</td><td>Ô đang có nhân vật (<code>UP</code>)</td></tr>
+      <tr><td><code>lastCell</code></td><td>số 0–8 | null</td><td>null</td><td>Ô của lần xuất hiện trước</td></tr>
+      <tr><td><code>spawnId</code></td><td>số nguyên</td><td>0</td><td>Mã lần xuất hiện hiện tại</td></tr>
+      <tr><td><code>upTimer</code></td><td>mã hẹn giờ | null</td><td>null</td><td>Hẹn giờ hết thời gian hiện</td></tr>
+      <tr><td><code>spawnTimer</code></td><td>mã hẹn giờ | null</td><td>(hẹn lần đầu)</td><td>Lịch hẹn xuất hiện đang chờ</td></tr>
+      <tr><td><code>rafId</code></td><td>mã khung hình | null</td><td>(vòng lặp đồng hồ)</td><td>Để huỷ khi kết thúc / chơi lại</td></tr>
+      <tr><td><code>highScore</code></td><td>số nguyên</td><td>Đọc từ lưu trữ</td><td>Kỷ lục hiện tại</td></tr>
+      <tr><td><code>isNewRecord</code></td><td>boolean</td><td>false</td><td>Lượt này có phá kỷ lục không</td></tr>
+    </tbody>
+  </table></div>
+  <div class="callout warn">
+    <span class="eyebrow">Quy tắc khởi tạo</span>
+    <p>Khởi tạo lượt mới phải <strong>huỷ toàn bộ</strong> <code>upTimer</code>, <code>spawnTimer</code>, <code>rafId</code> của lượt trước <em>trước khi</em> gán lại dữ liệu. Đây là điều kiện để đạt DoD 12 (bấm “Chơi lại” nhiều lần nhanh không làm đồng hồ chạy nhanh gấp đôi).</p>
+  </div>
+
+  <h2 id="hang-so"><span class="num">9</span>Bảng thông số</h2>
+  <p>Theo YC §5, các giá trị này đặt tập trung ở một chỗ trong code (một đối tượng <code>CONFIG</code>).</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Tên</th><th>Giá trị</th><th>Dùng ở</th></tr></thead>
+    <tbody>
+      <tr><td><code>GRID_SIZE</code></td><td>3 (9 ô)</td><td>Lưới</td></tr>
+      <tr><td><code>ROUND_MS</code></td><td>30 000</td><td>Đồng hồ</td></tr>
+      <tr><td><code>UP_MS</code></td><td>800</td><td>Thời gian nhân vật ở trên mặt đất</td></tr>
+      <tr><td><code>GAP_MIN_MS</code> / <code>GAP_MAX_MS</code></td><td>200 / 500</td><td>Khoảng nghỉ giữa 2 lần xuất hiện</td></tr>
+      <tr><td><code>POINTS_PER_HIT</code></td><td>1</td><td>Điểm mỗi lần đập trúng</td></tr>
+      <tr><td><code>WARN_SECONDS</code></td><td>5</td><td>Đồng hồ chuyển đỏ</td></tr>
+      <tr><td><code>SLIDE_MS</code></td><td>120</td><td>Hoạt ảnh trồi lên / chui xuống</td></tr>
+      <tr><td><code>HIT_FX_MS</code></td><td>300</td><td>Hiệu ứng “bị đập” và “+1”</td></tr>
+      <tr><td><code>STORAGE_KEY</code></td><td><code>"dapToi.highScore"</code></td><td>Lưu kỷ lục</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2 id="bien"><span class="num">10</span>Tình huống biên</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Tình huống</th><th>Xử lý mong đợi</th></tr></thead>
+    <tbody>
+      <tr><td>Bấm vào nhân vật đúng khung hình nó hết 800 ms</td><td>Theo trạng thái ô lúc xử lý sự kiện: còn <code>UP</code> thì tính, đã <code>EMPTY</code> thì không.</td></tr>
+      <tr><td>Hai ngón chạm cùng lúc vào cùng nhân vật</td><td>Chỉ +1.</td></tr>
+      <tr><td>Bấm “Bắt đầu” / “Chơi lại” 2 lần thật nhanh</td><td>Chỉ một lượt; lần bấm thứ hai bị bỏ qua vì trạng thái đã là <code>PLAYING</code>.</td></tr>
+      <tr><td>Rời tab giữa lượt, quay lại sau 40 giây</td><td>Thấy ngay S3 với điểm đã đạt trước khi rời tab.</td></tr>
+      <tr><td>Hết giờ đúng lúc nhân vật đang <code>UP</code></td><td>Nhân vật biến mất, không tính điểm cho lần bấm sau mốc <code>endAt</code>.</td></tr>
+      <tr><td>Lịch hẹn xuất hiện chạy sau khi đã hết giờ</td><td>Bỏ qua vì game không còn ở <code>PLAYING</code>.</td></tr>
+      <tr><td>Trình duyệt chặn <code>localStorage</code></td><td>Game chơi bình thường, kỷ lục chỉ giữ trong lần mở trang này.</td></tr>
+      <tr><td>Điểm 0 khi kỷ lục cũng là 0</td><td>Không hiện “Kỷ lục mới!”; S1 ẩn dòng kỷ lục.</td></tr>
+      <tr><td>Thay đổi kích thước hoặc xoay màn hình khi đang chơi</td><td>Bố cục co giãn lại, lượt chơi không bị gián đoạn.</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="pager">
+    <a href="03-man-hinh.html"><small>← Trước</small>03 Màn hình</a>
+    <a class="next" href="05-ke-hoach-test.html"><small>Tiếp →</small>05 Kế hoạch test</a>
+  </div>
+</main>
+
+<footer class="site"><div class="wrap">Tài liệu game Đập Tôi · 04 Quy tắc &amp; dữ liệu</div></footer>
+</body>
+</html>

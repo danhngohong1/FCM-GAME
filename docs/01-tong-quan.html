@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>01 Tổng quan — Tài liệu game Đập Tôi</title>
+<link rel="stylesheet" href="docs.css">
+</head>
+<body>
+<nav class="topnav" aria-label="Tài liệu">
+  <div class="wrap">
+    <a class="brand" href="index.html">Đập Tôi · Docs</a>
+    <a class="nav" href="index.html">Mục lục</a>
+    <a class="nav" href="01-tong-quan.html" aria-current="page">01 Tổng quan</a>
+    <a class="nav" href="02-chuc-nang.html">02 Chức năng</a>
+    <a class="nav" href="03-man-hinh.html">03 Màn hình</a>
+    <a class="nav" href="04-quy-tac-du-lieu.html">04 Quy tắc &amp; dữ liệu</a>
+    <a class="nav" href="05-ke-hoach-test.html">05 Kế hoạch test</a>
+    <a class="nav" href="06-giao-dien.html">06 Giao diện</a>
+  </div>
+</nav>
+
+<header class="page-head">
+  <div class="wrap">
+    <span class="eyebrow">01 · Tổng quan</span>
+    <h1>Tổng quan dự án</h1>
+    <p class="lead">Game là gì, dành cho ai, chơi thế nào và phiên bản đầu tiên làm đến đâu. Căn cứ: <code>YEU-CAU.md</code> phiên bản 1.1.</p>
+  </div>
+</header>
+
+<main class="wrap">
+  <nav class="toc" aria-label="Trong trang này">
+    <span class="eyebrow">Trong trang này</span>
+    <ol>
+      <li><a href="#gioi-thieu">Giới thiệu</a></li>
+      <li><a href="#muc-tieu">Mục tiêu</a></li>
+      <li><a href="#nguoi-choi">Người chơi &amp; thiết bị</a></li>
+      <li><a href="#vong-choi">Vòng chơi cốt lõi</a></li>
+      <li><a href="#phong-cach">Phong cách hình ảnh</a></li>
+      <li><a href="#pham-vi">Phạm vi phiên bản 1</a></li>
+      <li><a href="#cong-nghe">Công nghệ</a></li>
+      <li><a href="#thuat-ngu">Thuật ngữ</a></li>
+    </ol>
+  </nav>
+
+  <h2 id="gioi-thieu"><span class="num">1</span>Giới thiệu</h2>
+  <p><strong>Đập Tôi</strong> là mini game phản xạ chạy trên trình duyệt, kiểu “đập chuột” (whack-a-mole). Bàn chơi là lưới 3×3 gồm 9 hang. Nhân vật là ảnh chân dung của “tôi” đội vương miện, ló lên ngẫu nhiên khỏi một hang trong chốc lát rồi chui xuống. Người chơi bấm chuột hoặc chạm vào nhân vật đang ló lên để “đập”. Mỗi lần trúng được 1 điểm. Một lượt chơi kéo dài <strong>30 giây</strong>.</p>
+
+  <h2 id="muc-tieu"><span class="num">2</span>Mục tiêu</h2>
+  <ul>
+    <li><strong>Với người chơi:</strong> một trò vui ngắn, chơi lại nhiều lần để phá kỷ lục của chính mình.</li>
+    <li><strong>Với sản phẩm:</strong> mở file <code>index.html</code> là chơi được, không cần cài đặt, không cần máy chủ, chạy tốt trên cả máy tính lẫn điện thoại.</li>
+    <li><strong>Chỉ số thành công gợi ý:</strong> người chơi mới hiểu luật chỉ qua 1–2 câu trên màn hình Bắt đầu; tỷ lệ bấm “Chơi lại” sau lượt đầu cao.</li>
+  </ul>
+
+  <h2 id="nguoi-choi"><span class="num">3</span>Người chơi &amp; thiết bị</h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Nhóm</th><th>Thiết bị</th><th>Cách điều khiển</th><th>Ghi chú</th></tr></thead>
+      <tbody>
+        <tr><td>Người chơi phổ thông, mọi lứa tuổi</td><td>Điện thoại (dọc)</td><td>Chạm</td><td>Ô đủ lớn để chạm chính xác (tối thiểu 64×64 px).</td></tr>
+        <tr><td>Người chơi trên máy tính</td><td>Desktop, laptop</td><td>Chuột</td><td>Lưới căn giữa, không phóng quá lớn.</td></tr>
+        <tr><td>Người chơi trên máy tính bảng</td><td>Tablet (dọc/ngang)</td><td>Chạm</td><td>Bố cục co giãn theo cạnh ngắn của màn hình.</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>Trình duyệt hỗ trợ: Chrome, Edge, Firefox bản mới nhất trên máy tính; Chrome và Safari trên điện thoại.</p>
+
+  <h2 id="vong-choi"><span class="num">4</span>Vòng chơi cốt lõi</h2>
+  <div class="flow" aria-label="Luồng chơi">
+    <span class="node">Màn hình Bắt đầu</span><span class="arrow">→</span>
+    <span class="node">Chơi 30 giây</span><span class="arrow">→</span>
+    <span class="node">Kết thúc</span><span class="arrow">→</span>
+    <span class="node">Chơi lại</span><span class="arrow">↺</span>
+  </div>
+  <ol>
+    <li>Người chơi thấy tên game, luật ngắn, kỷ lục, rồi bấm <strong>“Bắt đầu”</strong>. Đồng hồ 30 giây chạy <strong>ngay lập tức</strong>.</li>
+    <li>Trong 30 giây, mỗi lúc có tối đa <strong>1</strong> nhân vật ló lên ở một ô ngẫu nhiên, ở trên khoảng <strong>800 ms</strong> rồi chui xuống. Nghỉ ngẫu nhiên <strong>200–500 ms</strong> rồi nhân vật ló lên ở ô khác.</li>
+    <li>Bấm trúng: +1 điểm, nhân vật biến mất ngay kèm hiệu ứng “bị đập” và chữ “+1”. Bấm hụt: không cộng, không trừ.</li>
+    <li>Còn 5 giây: đồng hồ chuyển màu đỏ.</li>
+    <li>Hết giờ: nhân vật không xuất hiện nữa, lưới không nhận thao tác, màn hình Kết thúc hiện điểm và kỷ lục. Phá kỷ lục thì báo “Kỷ lục mới!”.</li>
+    <li>Bấm <strong>“Chơi lại”</strong> để vào thẳng lượt mới (không quay về màn hình Bắt đầu).</li>
+  </ol>
+  <div class="callout warn">
+    <span class="eyebrow">Không có trong phiên bản này</span>
+    <p>Không đếm 3-2-1 trước lượt, không tạm dừng khi rời tab (đồng hồ vẫn chạy và lượt vẫn kết thúc đúng 30 giây), không âm thanh, không tăng độ khó, không có 2 nhân vật cùng lúc.</p>
+  </div>
+
+  <h2 id="phong-cach"><span class="num">5</span>Phong cách hình ảnh</h2>
+  <ul>
+    <li><strong>Giao diện:</strong> theo <code>design/tokens.css</code>, phong cách Pinterest (<code>DESIGN-pinterest.md</code>): nền trắng ngà phẳng, chữ Inter, bo góc 16 px, không bóng, đỏ <code>#e60023</code> chỉ dành cho nút chính và đồng hồ 5 giây cuối. Chi tiết ở <a href="06-giao-dien.html">trang 06 Giao diện</a>.</li>
+    <li><strong>Nhân vật:</strong> ảnh chân dung thật của “tôi” (đầu đội vương miện), cắt từ <code>DanhNH.png</code>, đã xoá nền, lưu ở <code>assets/toi.png</code>. Hai trạng thái: <em>bình thường</em> (ảnh gốc, đang cười) và <em>bị đập</em> (cùng ảnh nhưng bẹp xuống, nghiêng, có sao choáng).</li>
+    <li><strong>Hang:</strong> ô bo góc màu kem, nhân vật trồi lên từ miệng hang ở đáy ô.</li>
+  </ul>
+
+  <h2 id="pham-vi"><span class="num">6</span>Phạm vi phiên bản 1</h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Trong phạm vi</th><th>Ngoài phạm vi (theo YEU-CAU.md §6)</th></tr></thead>
+      <tbody>
+        <tr><td>Lưới 3×3, lượt 30 giây, +1 điểm mỗi lần trúng</td><td>Âm thanh, nhạc nền</td></tr>
+        <tr><td>Tối đa 1 nhân vật, không hiện lại ở ô vừa hiện</td><td>Nhiều mức độ khó, nhân vật tăng tốc theo thời gian</td></tr>
+        <tr><td>Kỷ lục lưu trong <code>localStorage</code></td><td>Nhiều nhân vật cùng lúc, vật phẩm đặc biệt</td></tr>
+        <tr><td>Hiệu ứng trồi lên / chui xuống, “bị đập”, “+1”</td><td>Bảng xếp hạng online, đăng nhập, lưu điểm lên máy chủ</td></tr>
+        <tr><td>Giao diện co giãn từ 320 px, chơi bằng chuột và cảm ứng</td><td>Đếm 3-2-1, tạm dừng / tiếp tục</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2 id="cong-nghe"><span class="num">7</span>Công nghệ</h2>
+  <ul>
+    <li>HTML, CSS, JavaScript thuần, không thư viện ngoài. Mở trực tiếp <code>index.html</code> là chơi được, không cần server.</li>
+    <li>Dùng <code>design/tokens.css</code> cho màu, chữ, khoảng cách, bo góc và thời lượng hiệu ứng.</li>
+    <li>Ảnh nhân vật: <code>assets/toi.png</code> (PNG nền trong suốt, 309×480 px).</li>
+    <li>Lưu kỷ lục bằng <code>localStorage</code>; nếu bị chặn, game vẫn chơi được, chỉ không lưu kỷ lục.</li>
+    <li>Nhận thao tác bằng Pointer Events (<code>pointerdown</code>) để dùng chung cho chuột và cảm ứng.</li>
+    <li>Mọi thông số (thời gian lượt, thời gian nhân vật ở trên, khoảng nghỉ, điểm mỗi lần trúng) đặt tập trung ở một chỗ.</li>
+  </ul>
+
+  <h2 id="thuat-ngu"><span class="num">8</span>Thuật ngữ</h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Thuật ngữ</th><th>Nghĩa</th></tr></thead>
+      <tbody>
+        <tr><td>Lượt (round)</td><td>Một lần chơi 30 giây, từ lúc bấm “Bắt đầu” hoặc “Chơi lại” đến khi hết giờ.</td></tr>
+        <tr><td>Ô / hang (cell)</td><td>Một trong 9 vị trí trên lưới, đánh số 0–8 từ trái sang phải, trên xuống dưới.</td></tr>
+        <tr><td>Lần xuất hiện (spawn)</td><td>Một lần nhân vật ló lên ở một ô, kéo dài 800 ms nếu không bị đập.</td></tr>
+        <tr><td>Khoảng nghỉ (gap)</td><td>Thời gian ngẫu nhiên 200–500 ms giữa lúc nhân vật biến mất và lần xuất hiện kế tiếp.</td></tr>
+        <tr><td>Đập trúng (hit)</td><td>Bấm vào ô khi nhân vật ở ô đó đang ở trạng thái <code>UP</code>.</td></tr>
+        <tr><td>Kỷ lục (high score)</td><td>Điểm cao nhất từng đạt trên trình duyệt này.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="pager">
+    <a href="index.html"><small>← Trước</small>Mục lục</a>
+    <a class="next" href="02-chuc-nang.html"><small>Tiếp →</small>02 Chức năng</a>
+  </div>
+</main>
+
+<footer class="site"><div class="wrap">Tài liệu game Đập Tôi · 01 Tổng quan</div></footer>
+</body>
+</html>

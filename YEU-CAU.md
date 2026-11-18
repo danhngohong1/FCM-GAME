@@ -1,37 +1,38 @@
-# YÊU CẦU — Mini game "Đập Chuột" (Whack-a-Mole)
+# YÊU CẦU — Mini game "Đập Tôi" (kiểu Whack-a-Mole)
 
-> Phiên bản: 1.0 · Ngày: 12/11/2026 · Trạng thái: Đặc tả, chưa viết code
+> Phiên bản: 1.1 · Ngày: 18/11/2026 (1.1: đổi nhân vật từ chuột sang ảnh “tôi”) · Trạng thái: Đặc tả, chưa viết code
 
 ## 1. Tổng quan
 
-Mini game chạy trên trình duyệt (desktop và điện thoại), không cần cài đặt, không cần máy chủ. Người chơi bấm vào con chuột xuất hiện ngẫu nhiên trong lưới 3×3 ô để ghi điểm trong thời gian 30 giây.
+Mini game chạy trên trình duyệt (desktop và điện thoại), không cần cài đặt, không cần máy chủ. Người chơi bấm vào nhân vật xuất hiện ngẫu nhiên trong lưới 3×3 ô để ghi điểm trong thời gian 30 giây.
 
 - Nền tảng: HTML + CSS + JavaScript thuần, mở trực tiếp file `index.html` là chơi được.
 - Thiết bị: chuột (desktop) và cảm ứng (mobile).
+- Nhân vật: ảnh chân dung của “tôi” đội vương miện, file `assets/toi.png` (cắt từ `DanhNH.png`, đã xoá nền).
 - Ngôn ngữ giao diện: tiếng Việt.
 
 ## 2. Luật chơi
 
 1. Bàn chơi gồm **9 ô (lưới 3×3)**, mỗi ô là một "hang".
 2. Người chơi bấm nút **"Bắt đầu"** để vào lượt chơi. Đồng hồ đếm ngược **30 giây** bắt đầu chạy ngay.
-3. Trong lượt chơi, **mỗi thời điểm chỉ có tối đa 1 con chuột** hiện lên ở một ô ngẫu nhiên.
-4. Chuột ở trên mặt đất trong một khoảng thời gian ngắn (mặc định **800 ms**), sau đó tự chui xuống.
-5. Sau khi chuột chui xuống (hoặc bị đập), chờ **khoảng nghỉ ngẫu nhiên 200–500 ms** rồi chuột mới hiện ở ô khác.
-6. Ô chuột hiện lần tiếp theo **không trùng** với ô vừa hiện liền trước.
-7. Người chơi bấm/chạm trúng chuột → chuột bị đập, biến mất ngay và được cộng điểm.
-8. Bấm vào ô trống hoặc bấm khi chuột đã chui xuống → **không cộng, không trừ** điểm.
-9. Mỗi con chuột chỉ được tính điểm **một lần** (bấm nhiều lần liên tiếp vào cùng con chuột chỉ được 1 điểm).
-10. Khi đồng hồ về **0**: lượt chơi kết thúc, chuột không còn xuất hiện, mọi thao tác bấm trên lưới bị bỏ qua.
+3. Trong lượt chơi, **mỗi thời điểm chỉ có tối đa 1 nhân vật** hiện lên ở một ô ngẫu nhiên.
+4. Nhân vật ở trên mặt đất trong một khoảng thời gian ngắn (mặc định **800 ms**), sau đó tự chui xuống.
+5. Sau khi nhân vật chui xuống (hoặc bị đập), chờ **khoảng nghỉ ngẫu nhiên 200–500 ms** rồi nhân vật mới hiện ở ô khác.
+6. Ô nhân vật hiện lần tiếp theo **không trùng** với ô vừa hiện liền trước.
+7. Người chơi bấm/chạm trúng nhân vật → nhân vật bị đập, biến mất ngay và được cộng điểm.
+8. Bấm vào ô trống hoặc bấm khi nhân vật đã chui xuống → **không cộng, không trừ** điểm.
+9. Mỗi nhân vật chỉ được tính điểm **một lần** (bấm nhiều lần liên tiếp vào cùng nhân vật chỉ được 1 điểm).
+10. Khi đồng hồ về **0**: lượt chơi kết thúc, nhân vật không còn xuất hiện, mọi thao tác bấm trên lưới bị bỏ qua.
 11. Người chơi có thể bấm **"Chơi lại"** để bắt đầu lượt mới; điểm và thời gian được đặt lại từ đầu.
 
 ## 3. Cách tính điểm
 
 | Hành động | Điểm |
 |---|---|
-| Bấm trúng chuột đang hiện | **+1** |
+| Bấm trúng nhân vật đang hiện | **+1** |
 | Bấm vào ô trống | 0 |
-| Bấm trúng cùng một con chuột lần thứ 2 trở đi | 0 |
-| Để chuột chui xuống mà không bấm | 0 |
+| Bấm trúng cùng một nhân vật lần thứ 2 trở đi | 0 |
+| Để nhân vật chui xuống mà không bấm | 0 |
 | Bấm sau khi hết giờ | 0 (không ghi nhận) |
 
 - Điểm bắt đầu mỗi lượt: **0**.
@@ -44,8 +45,8 @@ Game gồm 3 trạng thái màn hình trên cùng một trang.
 
 ### 4.1. Màn hình bắt đầu
 
-- Tên game: **"Đập Chuột"**.
-- Mô tả ngắn luật chơi (1–2 câu): "Bấm trúng chuột để ghi điểm. Bạn có 30 giây!"
+- Tên game: **"Đập Tôi"**.
+- Mô tả ngắn luật chơi (1–2 câu): "Bấm trúng tôi để ghi điểm. Bạn có 30 giây!"
 - Hiển thị **Kỷ lục: N** (ẩn hoặc hiện 0 nếu chưa có).
 - Nút **"Bắt đầu"** nổi bật.
 
@@ -64,8 +65,8 @@ Game gồm 3 trạng thái màn hình trên cùng một trang.
 - **Thanh trạng thái** ở trên: điểm hiện tại (bên trái) và thời gian còn lại (bên phải, đếm theo giây).
 - Khi còn **≤ 5 giây**, đồng hồ đổi sang màu đỏ để báo sắp hết giờ.
 - **Lưới 3×3** ở giữa: 9 ô kích thước bằng nhau, dạng hình vuông, có khoảng cách giữa các ô.
-- Chuột có hiệu ứng **trồi lên / chui xuống** (animation ngắn ~100–150 ms).
-- Khi đập trúng: hiệu ứng phản hồi (chuột đổi hình "bị choáng" hoặc ô nháy) và hiện "+1" bay lên trong ~300 ms.
+- Nhân vật có hiệu ứng **trồi lên / chui xuống** (animation ngắn ~100–150 ms).
+- Khi đập trúng: hiệu ứng phản hồi (ảnh nhân vật bẹp xuống, nghiêng, có sao "choáng" hoặc ô nháy) và hiện "+1" bay lên trong ~300 ms.
 - Con trỏ chuột trên desktop có thể thay bằng hình cái búa (không bắt buộc).
 
 ### 4.3. Màn hình kết thúc
@@ -90,15 +91,15 @@ Các giá trị sau đặt ở một chỗ duy nhất trong code để dễ ch�
 |---|---|
 | Kích thước lưới | 3 × 3 |
 | Thời gian mỗi lượt | 30 giây |
-| Thời gian chuột ở trên mặt đất | 800 ms |
-| Khoảng nghỉ giữa 2 lần chuột hiện | ngẫu nhiên 200–500 ms |
+| Thời gian nhân vật ở trên mặt đất | 800 ms |
+| Khoảng nghỉ giữa 2 lần nhân vật hiện | ngẫu nhiên 200–500 ms |
 | Điểm mỗi lần đập trúng | 1 |
 
 ## 6. Ngoài phạm vi (phiên bản này)
 
 - Âm thanh, nhạc nền.
-- Nhiều mức độ khó, chuột tăng tốc theo thời gian.
-- Nhiều chuột cùng lúc, vật phẩm đặc biệt (bom, chuột vàng…).
+- Nhiều mức độ khó, nhân vật tăng tốc theo thời gian.
+- Nhiều nhân vật cùng lúc, vật phẩm đặc biệt (bom, nhân vật vàng…).
 - Bảng xếp hạng online, đăng nhập, lưu điểm lên máy chủ.
 
 ## 7. Tiêu chí hoàn thành
@@ -110,12 +111,12 @@ Game được coi là hoàn thành khi **tất cả** các mục sau đều đ�
 - [ ] Màn hình bắt đầu hiển thị tên game, luật chơi ngắn, kỷ lục và nút "Bắt đầu".
 - [ ] Bấm "Bắt đầu" → đồng hồ chạy từ 30 về 0, điểm bắt đầu từ 0.
 - [ ] Lưới hiển thị đúng 9 ô xếp 3×3.
-- [ ] Tại mọi thời điểm có tối đa 1 chuột trên lưới; chuột không hiện 2 lần liên tiếp ở cùng một ô.
-- [ ] Chuột tự chui xuống sau ~800 ms nếu không bị đập.
-- [ ] Bấm trúng chuột: điểm +1, chuột biến mất ngay, có hiệu ứng phản hồi.
-- [ ] Bấm ô trống, bấm lặp lại cùng con chuột: điểm không đổi.
+- [ ] Tại mọi thời điểm có tối đa 1 nhân vật trên lưới; nhân vật không hiện 2 lần liên tiếp ở cùng một ô.
+- [ ] Nhân vật tự chui xuống sau ~800 ms nếu không bị đập.
+- [ ] Bấm trúng nhân vật: điểm +1, nhân vật biến mất ngay, có hiệu ứng phản hồi.
+- [ ] Bấm ô trống, bấm lặp lại cùng nhân vật: điểm không đổi.
 - [ ] Lượt chơi kết thúc đúng 30 giây (sai số ≤ 0,5 giây), kể cả khi chuyển tab rồi quay lại.
-- [ ] Sau khi hết giờ: không còn chuột xuất hiện, bấm lưới không đổi điểm, màn hình kết thúc hiện đúng điểm.
+- [ ] Sau khi hết giờ: không còn nhân vật xuất hiện, bấm lưới không đổi điểm, màn hình kết thúc hiện đúng điểm.
 - [ ] Kỷ lục được lưu và vẫn còn sau khi tải lại trang; chỉ cập nhật khi điểm mới lớn hơn.
 - [ ] "Chơi lại" đặt lại điểm = 0, thời gian = 30 và không còn bộ hẹn giờ cũ chạy chồng (bấm "Chơi lại" nhiều lần nhanh không làm đồng hồ chạy nhanh gấp đôi).
 
