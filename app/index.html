@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Đập Tôi</title>
+  <link rel="stylesheet" href="../design/tokens.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main id="app" class="app">
+
+    <!-- S1 · Bắt đầu -->
+    <section id="screen-start" class="screen screen--start" aria-labelledby="game-title">
+      <img class="start__hero" src="../assets/toi.png" alt="Nhân vật “tôi” đội vương miện" draggable="false">
+      <h1 id="game-title" class="start__title">Đập Tôi</h1>
+      <p class="start__rules">Bấm trúng tôi để ghi điểm. Bạn có <span data-round-seconds></span> giây!</p>
+      <button id="btn-start" class="btn btn--primary" type="button">Bắt đầu</button>
+      <p id="start-best" class="best" hidden>Kỷ lục: <span id="start-best-value">0</span></p>
+    </section>
+
+    <!-- S2 · Chơi (S3 là hộp nổi bên trong) -->
+    <section id="screen-play" class="screen screen--play" aria-label="Màn hình chơi" hidden>
+      <div class="board">
+        <header class="status">
+          <p class="status__score" aria-live="polite">Điểm: <span id="score">0</span></p>
+          <p id="timer" class="status__timer"><span aria-hidden="true">⏱ </span><span id="timer-text">00:00</span></p>
+        </header>
+        <div id="timebar" class="timebar" aria-hidden="true"><div id="timebar-fill" class="timebar__fill"></div></div>
+        <div class="grid-wrap">
+          <div id="grid" class="grid" role="group" aria-label="Lưới chơi"></div>
+        </div>
+
+        <!-- S3 · Kết thúc -->
+        <div id="result" class="overlay" hidden>
+          <div class="result" role="dialog" aria-modal="true" aria-labelledby="result-title">
+            <h2 id="result-title" class="result__title">Hết giờ!</h2>
+            <p class="result__label">Điểm của bạn</p>
+            <p id="result-score" class="result__score">0</p>
+            <p id="result-new" class="pill pill--record" hidden>★ Kỷ lục mới!</p>
+            <p class="best">Kỷ lục: <span id="result-best">0</span></p>
+            <button id="btn-replay" class="btn btn--primary" type="button">Chơi lại</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <p id="announcer" class="sr-only" aria-live="polite"></p>
+  </main>
+
+  <script src="game.js"></script>
+</body>
+</html>

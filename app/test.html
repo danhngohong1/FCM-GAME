@@ -1,0 +1,333 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Kiểm thử logic Đập Tôi</title>
+  <link rel="stylesheet" href="../design/tokens.css">
+  <style>
+    body { margin: 0; padding: var(--space-xl) var(--container-gutter); background: var(--color-surface-soft);
+           color: var(--color-body); font-family: var(--font-family); font-size: var(--size-body-sm); }
+    h1 { color: var(--color-ink); font-size: var(--size-heading-xl); letter-spacing: var(--tracking-heading-xl); margin: 0 0 var(--space-lg); }
+    #summary { font-weight: var(--weight-bold); margin-bottom: var(--space-lg); }
+    table { border-collapse: collapse; width: 100%; max-width: var(--container-max); background: var(--color-canvas); }
+    th, td { text-align: left; vertical-align: top; padding: var(--space-sm) var(--space-md); border-bottom: var(--border-hairline); }
+    th { color: var(--color-ink); }
+    .pass { color: var(--color-success-deep); font-weight: var(--weight-bold); }
+    .fail { color: var(--color-error); font-weight: var(--weight-bold); }
+    code { font-size: var(--size-caption); }
+  </style>
+</head>
+<body>
+  <h1>Kiểm thử logic tự động (UT-01 → UT-09)</h1>
+  <p id="summary">Đang chạy…</p>
+  <table>
+    <thead><tr><th>Mã</th><th>Nội dung</th><th>Kết quả</th><th>Chi tiết</th></tr></thead>
+    <tbody id="rows"></tbody>
+  </table>
+
+  <script src="game.js"></script>
+  <script>
+  (function () {
+    "use strict";
+    var D = window.DapToi;
+    var C = D.CONFIG;
+
+    /* ---------- Đồng hồ giả ---------- */
+    function FakeClock() {
+      var t = 0, seq = 0;
+      var timers = new Map();   // id -> { due, fn }
+      var frames = new Map();   // id -> fn
+      var api = {
+        now: function () { return t; },
+        setTimer: function (fn, ms) { seq++; timers.set(seq, { due: t + ms, fn: fn, kind: "timer" }); return seq; },
+        clearTimer: function (id) { timers.delete(id); },
+        requestFrame: function (fn) { seq++; frames.set(seq, fn); return seq; },
+        cancelFrame: function (id) { frames.delete(id); },
+        timers: timers,
+        frames: frames,
+        setNow: function (v) { t = v; },
+        runFrames: function () {
+          var list = Array.from(frames.values());
+          frames.clear();
+          list.forEach(function (fn) { fn(t); });
+        },
+        runDueTimers: function (until, keepTime) {
+          for (;;) {
+            var best = null, bestId = null;
+            timers.forEach(function (v, k) {
+              if (v.due <= until && (best === null || v.due < best.due || (v.due === best.due && k < bestId))) { best = v; bestId = k; }
+            });
+            if (!best) break;
+            timers.delete(bestId);
+            if (!keepTime) t = Math.max(t, best.due);
+            best.fn();
+          }
+        },
+        /** Tiến từng bước (mô phỏng khung hình mỗi `step` ms). */
+        advance: function (ms, step) {
+          step = step || 16;
+          var target = t + ms;
+          while (t < target) {
+            var next = Math.min(t + step, target);
+            api.runDueTimers(next, false);
+            t = next;
+            api.runFrames();
+          }
+        },
+        /** Nhảy một lần (tab bị ẩn): thời gian đã ở mốc cuối khi hẹn giờ chạy. */
+        jump: function (ms) {
+          t += ms;
+          api.runDueTimers(t, true);
+          api.runFrames();
+        }
+      };
+      return api;
+    }
+
+    function seededRandom(seed) {
+      var s = seed >>> 0;
+      return function () {
+        s = (s + 0x6D2B79F5) >>> 0;
+        var x = Math.imul(s ^ (s >>> 15), 1 | s);
+        x = (x + Math.imul(x ^ (x >>> 7), 61 | x)) ^ x;
+        return ((x ^ (x >>> 14)) >>> 0) / 4294967296;
+      };
+    }
+
+    function memStorage(initial) {
+      var m = new Map();
+      if (initial !== undefined && initial !== null) m.set(C.STORAGE_KEY, initial);
+      return {
+        writes: 0,
+        getItem: function (k) { return m.has(k) ? m.get(k) : null; },
+        setItem: function (k, v) { this.writes++; m.set(k, String(v)); },
+        raw: m
+      };
+    }
+
+    function makeEngine(clock, opts, hooks) {
+      opts = opts || {};
+      return D.createEngine({
+        now: clock.now, setTimer: clock.setTimer, clearTimer: clock.clearTimer,
+        requestFrame: clock.requestFrame, cancelFrame: clock.cancelFrame,
+        random: opts.random || seededRandom(opts.seed || 1),
+        storage: opts.storage || memStorage()
+      }, hooks || {});
+    }
+
+    var results = [];
+    function test(id, name, fn) {
+      var ok = false, detail = "";
+      try {
+        var r = fn();
+        ok = r.ok; detail = r.detail || "";
+      } catch (e) {
+        ok = false; detail = "Lỗi: " + e.message;
+      }
+      results.push({ id: id, name: name, ok: ok, detail: detail });
+    }
+
+    /* ---------- UT-01 ---------- */
+    test("UT-01", "Chọn ô 10 000 lần liên tiếp", function () {
+      var N = 10000, cells = C.GRID_SIZE * C.GRID_SIZE;
+      var counts = new Array(cells).fill(0), last = null, repeats = 0;
+      for (var i = 0; i < N; i++) {
+        var c = D.pickCell(last, Math.random, cells);
+        if (c === last) repeats++;
+        counts[c]++; last = c;
+      }
+      var pcts = counts.map(function (n) { return n / N * 100; });
+      var inRange = pcts.every(function (p) { return Math.abs(p - 100 / cells) <= 1.5; });
+      return { ok: repeats === 0 && inRange,
+        detail: "Trùng ô liền trước: " + repeats + "; tần suất: " + pcts.map(function (p) { return p.toFixed(1) + "%"; }).join(", ") };
+    });
+
+    /* ---------- UT-02 ---------- */
+    test("UT-02", "Mô phỏng 1 000 lượt với đồng hồ giả, không bấm", function () {
+      var maxUp = 0, badUp = 0, badGap = 0, ups = 0, gaps = 0;
+      for (var round = 0; round < 1000; round++) {
+        var clock = FakeClock();
+        var upCount = 0, upAt = null, downAt = null, startAt = 0;
+        var eng = makeEngine(clock, { seed: round + 1 }, {
+          up: function () {
+            upCount++; maxUp = Math.max(maxUp, upCount); ups++;
+            var t = clock.now();
+            var gap = t - (downAt === null ? startAt : downAt);
+            gaps++;
+            if (gap < C.GAP_MIN_MS || gap > C.GAP_MAX_MS) badGap++;
+            upAt = t;
+          },
+          down: function () {
+            upCount--;
+            downAt = clock.now();
+            if (Math.abs(downAt - upAt - C.UP_MS) > 1e-9) badUp++;
+          },
+          end: function () { upCount = 0; }
+        });
+        startAt = clock.now();
+        eng.startRound();
+        clock.advance(C.ROUND_MS + 100, 50);
+        if (eng.state !== "RESULT") throw new Error("Lượt " + round + " không kết thúc");
+      }
+      return { ok: maxUp <= 1 && badUp === 0 && badGap === 0,
+        detail: ups + " lần xuất hiện, " + gaps + " khoảng nghỉ; tối đa ô UP cùng lúc: " + maxUp +
+                "; UP sai 800 ms: " + badUp + "; nghỉ ngoài [200,500]: " + badGap };
+    });
+
+    /* ---------- UT-03 ---------- */
+    test("UT-03", "Bấm theo từng trạng thái ô và trạng thái game", function () {
+      var cases = [], allOk = true;
+      function check(label, expectGain, run) {
+        var clock = FakeClock(), activeCell = null;
+        var eng = makeEngine(clock, {}, { up: function (c) { activeCell = c; } });
+        var gained = run(eng, clock, function () { return activeCell; });
+        var ok = gained === expectGain;
+        if (!ok) allOk = false;
+        cases.push(label + ": " + (gained ? "+1" : "0") + (ok ? " ✓" : " ✗"));
+      }
+      function upNow(eng, clock, getActive) {
+        eng.startRound();
+        while (eng.data.activeCell === null) clock.advance(10, 10);
+        return getActive();
+      }
+      check("IDLE", false, function (eng) {
+        var before = eng.data.score; eng.hit(0); return eng.data.score > before;
+      });
+      check("PLAYING + EMPTY", false, function (eng, clock, ga) {
+        var c = upNow(eng, clock, ga);
+        var empty = (c + 1) % eng.cellCount;
+        var before = eng.data.score; eng.hit(empty); return eng.data.score > before;
+      });
+      check("PLAYING + UP + còn giờ", true, function (eng, clock, ga) {
+        var c = upNow(eng, clock, ga);
+        var before = eng.data.score; eng.hit(c); return eng.data.score === before + C.POINTS_PER_HIT;
+      });
+      check("PLAYING + UP, bấm lần 2", false, function (eng, clock, ga) {
+        var c = upNow(eng, clock, ga);
+        eng.hit(c);
+        var before = eng.data.score; eng.hit(c); return eng.data.score > before;
+      });
+      check("PLAYING + UP nhưng now ≥ endAt (khung hình chưa chạy)", false, function (eng, clock, ga) {
+        var c = upNow(eng, clock, ga);
+        clock.setNow(eng.data.endAt);
+        var before = eng.data.score; eng.hit(c);
+        return eng.data.score > before || eng.state !== "RESULT";
+      });
+      check("RESULT", false, function (eng, clock) {
+        eng.startRound(); clock.advance(C.ROUND_MS + 50, 50);
+        var before = eng.data.score;
+        for (var i = 0; i < eng.cellCount; i++) eng.hit(i);
+        return eng.data.score > before;
+      });
+      return { ok: allOk, detail: cases.join("; ") };
+    });
+
+    /* ---------- UT-04 ---------- */
+    test("UT-04", "Bấm trúng ở thời điểm 300 ms sau khi UP", function () {
+      var clock = FakeClock(), upAt = null, cell = null;
+      var eng = makeEngine(clock, { seed: 7 }, { up: function (c) { if (upAt === null) { upAt = clock.now(); cell = c; } } });
+      eng.startRound();
+      while (upAt === null) clock.advance(1, 1);
+      clock.setNow(upAt + 300);
+      var ok1 = eng.hit(cell);
+      var emptyNow = eng.data.activeCell === null;
+      var spawn = clock.timers.get(eng.data.spawnTimer);
+      var due = spawn ? spawn.due - upAt : NaN;
+      var upTimerGone = eng.data.upTimer === null;
+      var ok = ok1 && emptyNow && upTimerGone && due >= 300 + C.GAP_MIN_MS && due <= 300 + C.GAP_MAX_MS;
+      return { ok: ok, detail: "Ô về EMPTY: " + emptyNow + "; huỷ hẹn giờ hết thời gian hiện: " + upTimerGone +
+               "; lần xuất hiện kế tiếp hẹn lúc " + due.toFixed(1) + " ms tính từ lúc UP" };
+    });
+
+    /* ---------- UT-05 ---------- */
+    test("UT-05", "Đồng hồ: tiến 29 999 ms rồi 1 ms", function () {
+      var clock = FakeClock(), shown = "";
+      var eng = makeEngine(clock, {}, { tick: function (ms) { shown = D.formatTime(ms); } });
+      eng.startRound();
+      var first = D.formatTime(eng.data.remainingMs);
+      clock.advance(C.ROUND_MS - 1, 16);
+      var a = shown, stateA = eng.state;
+      clock.advance(1, 1);
+      var b = shown, stateB = eng.state;
+      var ok = first === "00:30" && a === "00:01" && stateA === "PLAYING" && b === "00:00" && stateB === "RESULT" && clock.now() === C.ROUND_MS;
+      return { ok: ok, detail: "Lúc đầu " + first + "; sau 29 999 ms: " + a + " (" + stateA + "); sau 30 000 ms: " + b + " (" + stateB + ")" };
+    });
+
+    /* ---------- UT-06 ---------- */
+    test("UT-06", "Đồng hồ giả nhảy một lần 45 000 ms (tab ẩn)", function () {
+      var clock = FakeClock(), upsAfterEnd = 0, endAt;
+      var eng = makeEngine(clock, {}, { up: function () { if (clock.now() >= endAt) upsAfterEnd++; } });
+      eng.startRound(); endAt = eng.data.endAt;
+      clock.jump(45000);
+      var st = eng.state;
+      clock.advance(5000, 50);
+      var pending = clock.timers.size + clock.frames.size;
+      return { ok: st === "RESULT" && upsAfterEnd === 0 && pending === 0,
+        detail: "Trạng thái sau khi nhảy: " + st + "; lần xuất hiện sau mốc kết thúc: " + upsAfterEnd + "; hẹn giờ/khung hình còn sót: " + pending };
+    });
+
+    /* ---------- UT-07 ---------- */
+    test("UT-07", "Khởi tạo lượt mới 5 lần liên tiếp khi lượt cũ còn hẹn giờ", function () {
+      var clock = FakeClock();
+      var eng = makeEngine(clock);
+      eng.startRound();
+      while (eng.data.activeCell === null) clock.advance(10, 10); // có cả upTimer lẫn khung hình đang chờ
+      for (var i = 0; i < 5; i++) eng.initRound();
+      var frames = clock.frames.size, timers = clock.timers.size;
+      clock.advance(C.ROUND_MS - 50, 16);
+      var stillPlaying = eng.state === "PLAYING";
+      clock.advance(100, 1);
+      var ok = frames === 1 && timers <= 2 && stillPlaying && eng.state === "RESULT";
+      return { ok: ok, detail: "Vòng đồng hồ: " + frames + "; hẹn giờ đang chờ: " + timers +
+               " (tối đa 1 xuất hiện + 1 hết thời gian hiện); lượt vẫn chạy ở " + (C.ROUND_MS - 50) + " ms: " + stillPlaying };
+    });
+
+    /* ---------- UT-08 ---------- */
+    test("UT-08", "Đọc kỷ lục với dữ liệu hỏng", function () {
+      var inputs = [null, "abc", "-1", "2.5", "99999", "42"];
+      var expected = [0, 0, 0, 0, 0, 42];
+      var got = inputs.map(function (v) { return D.readHighScore(memStorage(v)); });
+      var throwing = { getItem: function () { throw new Error("blocked"); } };
+      var gotThrow = D.readHighScore(throwing);
+      var ok = got.every(function (g, i) { return g === expected[i]; }) && gotThrow === 0 && D.readHighScore(null) === 0;
+      return { ok: ok, detail: "Kết quả: " + got.join(", ") + "; lưu trữ ném lỗi → " + gotThrow + "; không có lưu trữ → " + D.readHighScore(null) };
+    });
+
+    /* ---------- UT-09 ---------- */
+    test("UT-09", "Cập nhật kỷ lục với điểm nhỏ hơn, bằng, lớn hơn", function () {
+      var out = [], allOk = true;
+      [[9, false], [10, false], [11, true]].forEach(function (pair) {
+        var target = pair[0], expectNew = pair[1];
+        var storage = memStorage("10"), clock = FakeClock(), eng;
+        eng = makeEngine(clock, { storage: storage }, {
+          up: function (c) { if (eng.data.score < target) clock.setTimer(function () { eng.hit(c); }, 0); }
+        });
+        eng.startRound();
+        clock.advance(C.ROUND_MS + 50, 16);
+        var stored = storage.getItem(C.STORAGE_KEY);
+        var ok = eng.data.score === target && eng.data.isNewRecord === expectNew &&
+                 stored === String(expectNew ? target : 10) && storage.writes === (expectNew ? 1 : 0);
+        if (!ok) allOk = false;
+        out.push("điểm " + eng.data.score + " vs kỷ lục 10 → kỷ lục mới: " + eng.data.isNewRecord + ", lưu: " + stored + (ok ? " ✓" : " ✗"));
+      });
+      return { ok: allOk, detail: out.join("; ") };
+    });
+
+    /* ---------- Hiển thị ---------- */
+    var rows = document.getElementById("rows");
+    var pass = 0;
+    results.forEach(function (r) {
+      if (r.ok) pass++;
+      var tr = document.createElement("tr");
+      tr.innerHTML = "<td>" + r.id + "</td><td></td><td class='" + (r.ok ? "pass'>Đạt" : "fail'>Không đạt") + "</td><td></td>";
+      tr.children[1].textContent = r.name;
+      tr.children[3].textContent = r.detail;
+      rows.appendChild(tr);
+    });
+    document.getElementById("summary").textContent = "Đạt " + pass + "/" + results.length + " ca.";
+    window.__UT_RESULTS__ = results;
+  })();
+  </script>
+</body>
+</html>
