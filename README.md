@@ -42,6 +42,16 @@ Ghi chú:
 - Server không khởi động nếu thiếu `ADMIN_USERNAME`, `ADMIN_PASSWORD` hoặc mật khẩu admin ngắn hơn 12 ký tự; lý do ghi trong `docker compose logs app`.
 - Kỷ lục lưu trong `localStorage` của trình duyệt. Mở bằng nhấp đúp `app/index.html` thì không đăng ký được (cần server).
 
+## Chạy trên máy chủ (HTTPS)
+
+Trên máy chủ, ghép thêm `compose.prod.yaml`: dịch vụ `caddy` mở cổng 80/443 và tự lấy chứng chỉ HTTPS cho `SITE_DOMAIN` (trong `.env`); `app` và `db` không mở cổng ra ngoài và bị giới hạn RAM cho máy 1 GB.
+
+```bash
+docker compose -f compose.yaml -f compose.prod.yaml up -d --build
+```
+
+Cần trỏ bản ghi DNS `A` của tên miền về IP máy chủ trước khi chạy. Thử trên máy cá nhân: đặt `SITE_DOMAIN=localhost` rồi mở https://localhost (chứng chỉ nội bộ của Caddy, trình duyệt sẽ cảnh báo). Kế hoạch đầy đủ: `docs/06-ke-hoach-deploy.html`.
+
 ## Kiểm thử
 
 | Loại | Cách chạy |

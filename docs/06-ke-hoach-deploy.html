@@ -194,7 +194,7 @@ sudo sysctl --system</code></pre>
 
   <!-- 4 -->
   <h2 id="chuan-bi-repo"><span class="num">4</span>Thay đổi cần có trong repo trước khi deploy</h2>
-  <p>Chưa viết; sẽ làm sau khi bạn duyệt kế hoạch. <code>compose.yaml</code> hiện có giữ nguyên để chạy trên máy cá nhân.</p>
+  <p><strong>Đã làm 19/11/2026</strong> (trừ ảnh WebP): <code>compose.prod.yaml</code>, <code>Caddyfile</code>, <code>.env.example</code> (thêm <code>SITE_DOMAIN</code>), <code>ETag</code>/<code>Cache-Control</code> trong <code>server.js</code>. Đã chạy thử trên máy với <code>SITE_DOMAIN=localhost</code>: HTTP chuyển HTTPS (308), <code>www</code> chuyển về tên chính (301), có HSTS, gzip, ảnh trả 304 khi không đổi, cookie admin có <code>Secure</code>, gửi quá 64 KB trả 413; RAM lúc chạy: app 15 MB, caddy 16 MB, db 34 MB. <code>compose.yaml</code> giữ nguyên để chạy trên máy cá nhân.</p>
   <div class="table-wrap"><table>
     <thead><tr><th>File</th><th>Nội dung</th></tr></thead>
     <tbody>
@@ -259,7 +259,7 @@ docker run --rm hello-world</code></pre></td><td>Hiện phiên bản; <code>hell
       <tr><td class="id">9</td><td>Lấy code và tạo file bí mật:
 <pre><code>git clone https://github.com/danhngohong1/FCM-GAME.git ~/dap-toi
 cd ~/dap-toi
-cp .env.example .env &amp;&amp; nano .env      # điền mật khẩu mạnh
+cp .env.example .env &amp;&amp; nano .env      # điền mật khẩu mạnh; SITE_DOMAIN=fptelecom.io.vn
 chmod 600 .env</code></pre></td><td><pre><code>git log --oneline -1
 ls -l .env</code></pre></td><td>Đúng commit mới nhất; <code>.env</code> quyền <code>-rw-------</code>. Nếu repo để private: dùng deploy key chỉ-đọc, không dùng mật khẩu/token GitHub cá nhân trên máy chủ.</td></tr>
     </tbody>

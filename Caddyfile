@@ -1,0 +1,27 @@
+# Caddyfile — Reverse proxy + HTTPS tự động cho game "Đập Tôi"
+# Tên miền lấy từ biến SITE_DOMAIN (mặc định fptelecom.io.vn, xem compose.prod.yaml).
+# Caddy tự lấy và gia hạn chứng chỉ Let's Encrypt, tự chuyển HTTP -> HTTPS.
+
+# www.<tên miền> -> <tên miền>
+www.{$SITE_DOMAIN} {
+	redir https://{$SITE_DOMAIN}{uri} permanent
+}
+
+{$SITE_DOMAIN} {
+	encode zstd gzip
+
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		X-Frame-Options "DENY"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "same-origin"
+		-Server
+	}
+
+	# Không có yêu cầu hợp lệ nào lớn hơn vài KB (đăng ký, đăng nhập)
+	request_body {
+		max_size 64KB
+	}
+
+	reverse_proxy app:3000
+}

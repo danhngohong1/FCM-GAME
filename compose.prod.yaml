@@ -1,0 +1,70 @@
+# compose.prod.yaml — Ghép thêm lên compose.yaml khi chạy trên máy chủ (docs/06-ke-hoach-deploy.html · mục 3–4)
+#   docker compose -f compose.yaml -f compose.prod.yaml up -d --build
+# - Chỉ caddy mở cổng 80/443 ra ngoài; app và db chỉ nằm trong mạng Docker.
+# - Giới hạn RAM cho máy e2-micro 1 GB: caddy 64 MB, app 192 MB, db 256 MB.
+# - Giới hạn kích thước log Docker để không đầy đĩa.
+
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+services:
+  app:
+    ports: !reset []
+    expose:
+      - "3000"
+    environment:
+      TRUST_PROXY: "1"
+      NODE_OPTIONS: "--max-old-space-size=128"
+    deploy:
+      resources:
+        limits:
+          memory: 192M
+    logging: *logging
+
+  db:
+    command:
+      - postgres
+      - -c
+      - shared_buffers=32MB
+      - -c
+      - work_mem=2MB
+      - -c
+      - maintenance_work_mem=16MB
+      - -c
+      - effective_cache_size=128MB
+      - -c
+      - max_connections=20
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+    logging: *logging
+
+  caddy:
+    image: caddy:2-alpine
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      SITE_DOMAIN: ${SITE_DOMAIN:-fptelecom.io.vn}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      app:
+        condition: service_healthy
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 64M
+    logging: *logging
+
+volumes:
+  caddy-data:
+  caddy-config:

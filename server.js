@@ -317,14 +317,31 @@ async function apiExportCsv(req, res, url) {
 
 /* ---------- File tĩnh ---------- */
 
+/** Ảnh ít đổi: cho trình duyệt dùng lại 7 ngày; file khác: luôn hỏi lại nhưng nhận 304 nếu không đổi. */
+function cacheControlFor(filePath) {
+  return filePath.startsWith(path.join(ROOT, "assets") + path.sep) ? "public, max-age=604800" : "no-cache";
+}
+
 function serveFile(req, res, filePath, extraHeaders = {}) {
   fs.stat(filePath, (err, stat) => {
     if (err || !stat.isFile()) return sendText(res, 404, "Not Found");
+    const etag = `W/"${stat.size.toString(16)}-${Math.floor(stat.mtimeMs).toString(16)}"`;
+    const headers = {
+      "Cache-Control": cacheControlFor(filePath),
+      ETag: etag,
+      "Last-Modified": stat.mtime.toUTCString(),
+      ...extraHeaders,
+    };
+    const noStore = /no-store/.test(headers["Cache-Control"]);
+    if (!noStore && req.headers["if-none-match"] === etag) {
+      res.writeHead(304, headers);
+      return res.end();
+    }
+    if (noStore) delete headers.ETag;
     res.writeHead(200, {
       "Content-Type": MIME[path.extname(filePath).toLowerCase()] || "application/octet-stream",
       "Content-Length": stat.size,
-      "Cache-Control": "no-cache",
-      ...extraHeaders,
+      ...headers,
     });
     if (req.method === "HEAD") return res.end();
     fs.createReadStream(filePath).pipe(res);
