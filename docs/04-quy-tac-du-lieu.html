@@ -42,6 +42,15 @@
       <li><a href="#runtime">Dữ liệu trong lượt chơi</a></li>
       <li><a href="#hang-so">Bảng thông số</a></li>
       <li><a href="#bien">Tình huống biên</a></li>
+      <li><a href="#app-state">Trạng thái ứng dụng (có đăng ký)</a> <span class="tag new">Mới</span></li>
+      <li><a href="#kiem-tra-nhap">Kiểm tra &amp; chuẩn hoá dữ liệu nhập</a> <span class="tag new">Mới</span></li>
+      <li><a href="#luu-tru-2">Lưu trên trình duyệt (bổ sung)</a> <span class="tag new">Mới</span></li>
+      <li><a href="#db">Cơ sở dữ liệu PostgreSQL</a> <span class="tag new">Mới</span></li>
+      <li><a href="#csv">Định dạng file CSV</a> <span class="tag new">Mới</span></li>
+      <li><a href="#api">API của server</a> <span class="tag new">Mới</span></li>
+      <li><a href="#admin-bao-mat">Phiên admin &amp; bảo mật</a> <span class="tag new">Mới</span></li>
+      <li><a href="#hang-so-2">Bảng thông số bổ sung</a> <span class="tag new">Mới</span></li>
+      <li><a href="#bien-2">Tình huống biên bổ sung</a> <span class="tag new">Mới</span></li>
     </ol>
   </nav>
 
@@ -194,6 +203,233 @@
       <tr><td>Trình duyệt chặn <code>localStorage</code></td><td>Game chơi bình thường, kỷ lục chỉ giữ trong lần mở trang này.</td></tr>
       <tr><td>Điểm 0 khi kỷ lục cũng là 0</td><td>Không hiện “Kỷ lục mới!”; S1 ẩn dòng kỷ lục.</td></tr>
       <tr><td>Thay đổi kích thước hoặc xoay màn hình khi đang chơi</td><td>Bố cục co giãn lại, lượt chơi không bị gián đoạn.</td></tr>
+    </tbody>
+  </table></div>
+
+  <!-- ================= Bổ sung: Đăng ký người chơi & trang quản trị ================= -->
+
+  <h2 id="app-state"><span class="num">11</span>Trạng thái ứng dụng (có đăng ký) <span class="tag new">Mới</span></h2>
+  <p>Bổ sung 2 trạng thái đứng trước <code>IDLE</code> của mục 1. Ba trạng thái <code>IDLE</code>, <code>PLAYING</code>, <code>RESULT</code> và mọi quy tắc của chúng giữ nguyên.</p>
+  <div class="flow">
+    <span class="node">BOOT</span><span class="arrow">→</span><span class="node">REGISTER</span><span class="arrow">→</span><span class="node">IDLE</span><span class="arrow">→</span><span class="node">PLAYING</span><span class="arrow">⇄</span><span class="node">RESULT</span>
+  </div>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Trạng thái</th><th>Màn hình</th><th>Ý nghĩa</th></tr></thead>
+    <tbody>
+      <tr><td><code>BOOT</code></td><td>“Đang tải…”</td><td>Vừa mở trang, đang kiểm tra người chơi đã nhớ.</td></tr>
+      <tr><td><code>REGISTER</code></td><td>S0 Đăng ký</td><td>Chưa có người chơi hợp lệ. Có cờ phụ <code>submitting</code> (đang gửi) để khoá nút.</td></tr>
+    </tbody>
+  </table></div>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Từ</th><th>Sự kiện</th><th>Đến</th><th>Việc phải làm</th></tr></thead>
+    <tbody>
+      <tr><td>BOOT</td><td>Không có <code>dapToi.player</code> hợp lệ</td><td>REGISTER</td><td>Hiện S0, focus ô Họ và tên.</td></tr>
+      <tr><td>BOOT</td><td>Có <code>dapToi.player</code>; <code>GET /api/players/{id}</code> trả 200</td><td>IDLE</td><td>Cập nhật họ tên đã nhớ theo server; hiện S1 với lời chào.</td></tr>
+      <tr><td>BOOT</td><td>… trả 404</td><td>REGISTER</td><td>Xoá <code>dapToi.player</code>; hiện S0 trống.</td></tr>
+      <tr><td>BOOT</td><td>… lỗi mạng, lỗi 5xx hoặc quá <code>BOOT_TIMEOUT_MS</code></td><td>IDLE</td><td>Dùng họ tên đã nhớ; không xoá <code>dapToi.player</code>.</td></tr>
+      <tr><td>REGISTER</td><td>Bấm “Đăng ký &amp; chơi”, kiểm tra phía trình duyệt đạt, chưa <code>submitting</code></td><td>REGISTER (<code>submitting</code>)</td><td>Gửi <code>POST /api/players</code>.</td></tr>
+      <tr><td>REGISTER (<code>submitting</code>)</td><td>Server trả 200 / 201</td><td>IDLE</td><td>Ghi <code>dapToi.player</code>, hiện S1, focus “Bắt đầu”.</td></tr>
+      <tr><td>REGISTER (<code>submitting</code>)</td><td>Server trả 400 / 429 / 5xx, hoặc lỗi mạng</td><td>REGISTER</td><td>Bỏ <code>submitting</code>, hiện lỗi (theo ô hoặc lỗi chung), giữ dữ liệu đã nhập.</td></tr>
+      <tr><td>IDLE</td><td>Bấm “Đổi người chơi”</td><td>REGISTER</td><td>Xoá <code>dapToi.player</code> (giữ <code>dapToi.highScore</code>); hiện S0 trống.</td></tr>
+    </tbody>
+  </table></div>
+  <p>“Đổi người chơi” chỉ có ở <code>IDLE</code>; trong <code>PLAYING</code> và <code>RESULT</code> không đổi được người chơi.</p>
+
+  <h2 id="kiem-tra-nhap"><span class="num">12</span>Kiểm tra &amp; chuẩn hoá dữ liệu nhập <span class="tag new">Mới</span></h2>
+  <p>Cùng một bộ quy tắc chạy ở trình duyệt (để báo lỗi nhanh) và ở server (quyết định cuối cùng). Thứ tự: <strong>chuẩn hoá → kiểm tra → lưu bản đã chuẩn hoá</strong>.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Trường</th><th>Chuẩn hoá</th><th>Hợp lệ khi</th><th>Ví dụ</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><code>fullName</code><br>Họ và tên</td>
+        <td>Chuẩn Unicode NFC; bỏ khoảng trắng đầu/cuối; nhiều khoảng trắng liền nhau gộp thành 1. Giữ nguyên hoa thường.</td>
+        <td>Dài 2–100 ký tự sau chuẩn hoá; chỉ gồm chữ cái (mọi ngôn ngữ, kể cả tiếng Việt có dấu), khoảng trắng và các dấu <code>'</code> <code>-</code> <code>.</code>; có ít nhất 2 chữ cái.</td>
+        <td>“  nguyễn   văn An ” → “nguyễn văn An” ✓ · “A” ✗ · “An123” ✗</td>
+      </tr>
+      <tr>
+        <td><code>email</code></td>
+        <td>Bỏ khoảng trắng đầu/cuối; đổi toàn bộ thành chữ thường.</td>
+        <td>Dài tối đa 254 ký tự; khớp <code>^[^\s@]+@[^\s@]+\.[^\s@]{2,}$</code>; không có khoảng trắng ở giữa.</td>
+        <td>“ An.Nguyen@Gmail.com ” → “an.nguyen@gmail.com” ✓ · “an@gmail” ✗</td>
+      </tr>
+      <tr>
+        <td><code>phone</code><br>Số điện thoại</td>
+        <td>Bỏ khoảng trắng, <code>.</code>, <code>-</code>, <code>(</code>, <code>)</code>. Nếu bắt đầu bằng <code>+84</code> hoặc <code>84</code> và còn 9 chữ số phía sau thì thay phần đầu bằng <code>0</code>.</td>
+        <td>Khớp <code>^0[35789][0-9]{8}$</code> (10 chữ số, đầu di động Việt Nam) <strong>(GĐ-3)</strong>.</td>
+        <td>“+84 912.345.678” → “0912345678” ✓ · “0212345678” ✗ · “091234567” ✗</td>
+      </tr>
+      <tr>
+        <td><code>consent</code><br>Đồng ý</td>
+        <td>—</td>
+        <td>Đúng giá trị boolean <code>true</code> <strong>(GĐ-2)</strong>.</td>
+        <td><code>true</code> ✓ · <code>"true"</code> ✗ · thiếu ✗</td>
+      </tr>
+    </tbody>
+  </table></div>
+  <ul>
+    <li>Thiếu trường, sai kiểu (không phải chuỗi), hoặc có trường lạ: trường thiếu / sai kiểu báo lỗi “Vui lòng nhập …”; trường lạ bị bỏ qua.</li>
+    <li>Trình duyệt: kiểm tra một ô khi rời ô đó (<code>blur</code>) và kiểm tra tất cả khi bấm nút. Lỗi đã hiện thì biến mất ngay khi ô trở nên hợp lệ trong lúc gõ.</li>
+    <li>Câu báo lỗi lấy đúng theo <a href="03-man-hinh.html#dk-chu">trang 03 · mục 12</a>; mỗi ô chỉ hiện lỗi đầu tiên gặp phải theo thứ tự: rỗng → độ dài / số chữ số → định dạng.</li>
+  </ul>
+
+  <h2 id="luu-tru-2"><span class="num">13</span>Lưu trên trình duyệt (bổ sung) <span class="tag new">Mới</span></h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Khoá</th><th>Kiểu (chuỗi JSON)</th><th>Ghi khi</th><th>Xoá khi</th><th>Kiểm tra khi đọc</th></tr></thead>
+    <tbody>
+      <tr><td><code>dapToi.player</code></td><td><code>{"id":"&lt;uuid&gt;","fullName":"Nguyễn Văn An"}</code></td><td>Đăng ký thành công; khởi động thấy họ tên trên server khác bản đã nhớ</td><td>Server báo 404; bấm “Đổi người chơi”</td><td>Không phải JSON, <code>id</code> không đúng dạng UUID, hoặc <code>fullName</code> không phải chuỗi 1–100 ký tự: coi như chưa có và xoá khoá này</td></tr>
+    </tbody>
+  </table></div>
+  <ul>
+    <li>Không lưu email, số điện thoại trên trình duyệt. <code>dapToi.highScore</code> (mục 7) giữ nguyên, dùng chung cho mọi người chơi trên cùng trình duyệt.</li>
+    <li>Đọc/ghi trong <code>try/catch</code> như mục 7. Bị chặn thì nhớ người chơi trong bộ nhớ đến khi tải lại trang.</li>
+  </ul>
+
+  <h2 id="db"><span class="num">14</span>Cơ sở dữ liệu PostgreSQL <span class="tag new">Mới</span></h2>
+  <p>PostgreSQL 16 chạy ở dịch vụ <code>db</code> của Docker Compose, dữ liệu trong volume <code>db-data</code>. Server tạo bảng khi khởi động nếu chưa có (<code>CREATE … IF NOT EXISTS</code>), bật extension <code>unaccent</code> để tìm không dấu.</p>
+
+  <h3>14.1 Bảng <code>players</code></h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Cột</th><th>Kiểu</th><th>Ràng buộc</th><th>Ý nghĩa</th></tr></thead>
+    <tbody>
+      <tr><td><code>id</code></td><td><code>UUID</code></td><td>Khoá chính, mặc định <code>gen_random_uuid()</code></td><td>Mã người chơi (gửi về trình duyệt). Dùng UUID để không đoán được mã của người khác.</td></tr>
+      <tr><td><code>full_name</code></td><td><code>VARCHAR(100)</code></td><td><code>NOT NULL</code></td><td>Họ tên đã chuẩn hoá.</td></tr>
+      <tr><td><code>email</code></td><td><code>VARCHAR(254)</code></td><td><code>NOT NULL</code>, <code>UNIQUE</code></td><td>Email chữ thường, định danh người chơi <strong>(GĐ-1)</strong>.</td></tr>
+      <tr><td><code>phone</code></td><td><code>CHAR(10)</code></td><td><code>NOT NULL</code>, <code>CHECK (phone ~ '^0[35789][0-9]{8}$')</code></td><td>Số điện thoại đã chuẩn hoá.</td></tr>
+      <tr><td><code>consent_at</code></td><td><code>TIMESTAMPTZ</code></td><td><code>NOT NULL</code></td><td>Lần gần nhất người chơi tick đồng ý.</td></tr>
+      <tr><td><code>created_at</code></td><td><code>TIMESTAMPTZ</code></td><td><code>NOT NULL DEFAULT now()</code></td><td>Lần đăng ký đầu tiên; là “Thời điểm đăng ký” trên trang admin và CSV.</td></tr>
+      <tr><td><code>updated_at</code></td><td><code>TIMESTAMPTZ</code></td><td><code>NOT NULL DEFAULT now()</code></td><td>Lần cập nhật gần nhất (đăng ký lại cùng email).</td></tr>
+    </tbody>
+  </table></div>
+  <p>Chỉ mục: <code>UNIQUE (email)</code>; <code>(created_at DESC)</code> cho sắp xếp danh sách.</p>
+
+  <h3>14.2 Bảng <code>admin_sessions</code></h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Cột</th><th>Kiểu</th><th>Ý nghĩa</th></tr></thead>
+    <tbody>
+      <tr><td><code>token_hash</code></td><td><code>CHAR(64)</code>, khoá chính</td><td>SHA-256 (hex) của mã phiên trong cookie. Không lưu mã gốc.</td></tr>
+      <tr><td><code>created_at</code></td><td><code>TIMESTAMPTZ NOT NULL DEFAULT now()</code></td><td>Lúc đăng nhập.</td></tr>
+      <tr><td><code>expires_at</code></td><td><code>TIMESTAMPTZ NOT NULL</code></td><td><code>created_at + SESSION_HOURS</code>. Hết hạn thì coi như không có.</td></tr>
+    </tbody>
+  </table></div>
+  <p>Lưu phiên trong database để khởi động lại container <code>app</code> không làm admin bị đăng xuất. Phiên hết hạn được xoá mỗi lần có người đăng nhập.</p>
+
+  <h3>14.3 Quy tắc ghi &amp; tìm</h3>
+  <ul>
+    <li><strong>Đăng ký:</strong> một câu <code>INSERT … ON CONFLICT (email) DO UPDATE SET full_name, phone, consent_at = now(), updated_at = now()</code>, trả về <code>id</code> và cờ “tạo mới hay cập nhật”. <code>created_at</code> không đổi khi cập nhật.</li>
+    <li><strong>Tìm kiếm</strong> với từ khoá <code>q</code> (đã bỏ khoảng trắng đầu/cuối, tối đa <code>SEARCH_MAX</code> ký tự):
+      <ul>
+        <li>khớp nếu <code>unaccent(lower(full_name))</code> hoặc <code>email</code> chứa <code>unaccent(lower(q))</code>; ký tự <code>%</code>, <code>_</code>, <code>\</code> trong <code>q</code> được thoát để tìm đúng nghĩa đen;</li>
+        <li>hoặc, nếu <code>q</code> có ít nhất 3 chữ số: <code>phone</code> chứa dãy chữ số của <code>q</code> (sau khi bỏ mọi ký tự không phải số).</li>
+      </ul>
+    </li>
+    <li><strong>Sắp xếp:</strong> <code>created_at DESC, id</code> (cố định thứ tự khi trùng thời điểm).</li>
+    <li><strong>Phân trang:</strong> <code>PAGE_SIZE</code> = 20; <code>page</code> nhỏ hơn 1 hoặc không phải số nguyên thì dùng 1; lớn hơn số trang thì dùng trang cuối (danh sách rỗng: 1 trang).</li>
+    <li><strong>Xoá:</strong> <code>DELETE … WHERE id = $1</code>; không có dòng nào bị xoá thì trả 404.</li>
+    <li>Mọi câu lệnh dùng tham số <code>$1, $2…</code>, không ghép chuỗi.</li>
+  </ul>
+
+  <h2 id="csv"><span class="num">15</span>Định dạng file CSV <span class="tag new">Mới</span></h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Mục</th><th>Quy tắc</th></tr></thead>
+    <tbody>
+      <tr><td>Mã hoá</td><td>UTF-8 <strong>có BOM</strong> (<code>EF BB BF</code>) để Excel trên Windows hiện đúng tiếng Việt.</td></tr>
+      <tr><td>Phân cách, xuống dòng</td><td>Dấu phẩy <code>,</code>; xuống dòng <code>CRLF</code>; theo RFC 4180.</td></tr>
+      <tr><td>Dòng tiêu đề</td><td><code>Họ và tên,Email,Số điện thoại,Thời điểm đăng ký</code></td></tr>
+      <tr><td>Thứ tự dòng</td><td>Như trang admin: <code>created_at DESC</code>; chỉ những dòng khớp từ khoá <code>q</code> đang áp dụng; không phân trang.</td></tr>
+      <tr><td>Thời điểm đăng ký</td><td><code>dd/MM/yyyy HH:mm:ss</code> theo giờ <code>Asia/Ho_Chi_Minh</code>.</td></tr>
+      <tr><td>Số điện thoại</td><td>Ghi dạng <code>0912 345 678</code> (có khoảng trắng) để Excel không coi là số và không mất số 0 ở đầu <strong>(GĐ-7)</strong>.</td></tr>
+      <tr><td>Dấu ngoặc kép</td><td>Ô chứa <code>,</code> <code>"</code> <code>CR</code> hoặc <code>LF</code> được bao bởi <code>"…"</code>; dấu <code>"</code> bên trong nhân đôi thành <code>""</code>.</td></tr>
+      <tr><td>Chống chèn công thức</td><td>Ô bắt đầu bằng <code>=</code> <code>+</code> <code>-</code> <code>@</code>, Tab hoặc CR được thêm dấu <code>'</code> ở đầu (Excel không chạy như công thức).</td></tr>
+      <tr><td>Tên file</td><td><code>dap-toi-nguoi-choi-YYYYMMDD-HHmm.csv</code> theo giờ Việt Nam, gửi trong <code>Content-Disposition: attachment</code>.</td></tr>
+      <tr><td>Danh sách rỗng</td><td>File chỉ có BOM và dòng tiêu đề.</td></tr>
+    </tbody>
+  </table></div>
+  <p>Ví dụ (sau BOM):</p>
+  <pre><code>Họ và tên,Email,Số điện thoại,Thời điểm đăng ký
+Nguyễn Văn An,an.nguyen@gmail.com,0912 345 678,18/11/2026 21:04:37
+"O'Brien, Mary",mary@example.com,0387 654 321,17/11/2026 09:12:05</code></pre>
+
+  <h2 id="api"><span class="num">16</span>API của server <span class="tag new">Mới</span></h2>
+  <p>Cùng một server Node.js phục vụ file tĩnh (như hiện tại) và các API dưới đây. Dữ liệu gửi và nhận dạng JSON <code>UTF-8</code>, trừ file CSV. Lỗi trả về dạng <code>{"error": "mã_lỗi", "message": "câu tiếng Việt"}</code>; lỗi dữ liệu có thêm <code>"fields": {"tên_trường": "câu lỗi"}</code>.</p>
+
+  <h3>16.1 API cho game (không cần đăng nhập)</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Phương thức &amp; đường dẫn</th><th>Gửi</th><th>Kết quả</th></tr></thead>
+    <tbody>
+      <tr><td><code>POST /api/players</code></td><td><code>{"fullName","email","phone","consent"}</code>, tối đa <code>BODY_MAX_BYTES</code></td><td>
+        <code>201</code> tạo mới / <code>200</code> cập nhật email đã có: <code>{"id","fullName"}</code><br>
+        <code>400</code> dữ liệu sai (có <code>fields</code>) · <code>413</code> quá lớn · <code>415</code> không phải JSON · <code>429</code> gửi quá nhiều (kèm <code>Retry-After</code>) · <code>503</code> database không sẵn sàng</td></tr>
+      <tr><td><code>GET /api/players/{id}</code></td><td>—</td><td><code>200</code> <code>{"id","fullName"}</code> · <code>404</code> không có hoặc <code>id</code> sai dạng UUID. Không trả email, số điện thoại.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>16.2 Trang &amp; API admin</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Phương thức &amp; đường dẫn</th><th>Cần phiên</th><th>Kết quả</th></tr></thead>
+    <tbody>
+      <tr><td><code>GET /admin/login</code></td><td>Không</td><td>Trang A1. Đã có phiên hợp lệ thì chuyển <code>302</code> sang <code>/admin/</code>.</td></tr>
+      <tr><td><code>GET /admin/</code></td><td>Có</td><td>Trang A2. Không có phiên: <code>302</code> sang <code>/admin/login</code>.</td></tr>
+      <tr><td><code>POST /admin/api/login</code></td><td>Không</td><td><code>{"username","password"}</code> → <code>204</code> kèm cookie phiên · <code>401</code> sai · <code>429</code> đang bị khoá (<code>Retry-After</code>, <code>retryAfterMinutes</code>)</td></tr>
+      <tr><td><code>POST /admin/api/logout</code></td><td>Có</td><td><code>204</code>, xoá phiên trong database và xoá cookie.</td></tr>
+      <tr><td><code>GET /admin/api/players?q=&amp;page=</code></td><td>Có</td><td><code>200</code> <code>{"total","page","pageSize","pages","items":[{"id","fullName","email","phone","createdAt"}]}</code>; <code>createdAt</code> dạng ISO 8601.</td></tr>
+      <tr><td><code>DELETE /admin/api/players/{id}</code></td><td>Có</td><td><code>204</code> đã xoá · <code>404</code> không còn tồn tại.</td></tr>
+      <tr><td><code>GET /admin/api/players.csv?q=</code></td><td>Có</td><td><code>200</code> <code>text/csv; charset=utf-8</code>, tải về theo mục 15.</td></tr>
+    </tbody>
+  </table></div>
+  <p>Mọi API “Có” ở cột “Cần phiên” trả <code>401</code> khi không có phiên hoặc phiên hết hạn; trang admin nhận <code>401</code> thì chuyển sang A1 với thông báo phiên hết hạn.</p>
+
+  <h2 id="admin-bao-mat"><span class="num">17</span>Phiên admin &amp; bảo mật <span class="tag new">Mới</span></h2>
+  <ul>
+    <li><strong>Tài khoản:</strong> so sánh tên và mật khẩu với <code>ADMIN_USERNAME</code>, <code>ADMIN_PASSWORD</code> bằng phép so sánh thời gian không đổi (so SHA-256 của hai bên bằng <code>crypto.timingSafeEqual</code>). Server không khởi động nếu thiếu biến hoặc mật khẩu ngắn hơn <code>ADMIN_PASSWORD_MIN</code>.</li>
+    <li><strong>Mã phiên:</strong> 32 byte ngẫu nhiên (<code>crypto.randomBytes</code>), mã hoá base64url, đặt trong cookie <code>dapToi.admin</code> với <code>HttpOnly</code>, <code>SameSite=Strict</code>, <code>Path=/admin</code>, <code>Max-Age</code> = <code>SESSION_HOURS</code>; thêm <code>Secure</code> khi chạy qua HTTPS. Phiên có hạn tuyệt đối, không tự gia hạn.</li>
+    <li><strong>Khoá đăng nhập:</strong> mỗi IP sai quá <code>LOGIN_MAX_FAILS</code> lần trong <code>LOGIN_WINDOW_MIN</code> phút thì bị khoá <code>LOGIN_LOCK_MIN</code> phút; trong lúc khoá, cả mật khẩu đúng cũng trả <code>429</code>. Đăng nhập đúng xoá bộ đếm của IP đó. Bộ đếm giữ trong bộ nhớ server (mất khi khởi động lại).</li>
+    <li><strong>Giới hạn đăng ký:</strong> mỗi IP tối đa <code>REGISTER_MAX</code> lần <code>POST /api/players</code> trong <code>REGISTER_WINDOW_MIN</code> phút; vượt thì <code>429</code>.</li>
+    <li><strong>Chống gửi giả mạo:</strong> mọi yêu cầu <code>POST</code>/<code>DELETE</code> phải có header <code>Origin</code> trùng với địa chỉ server, nếu không trả <code>403</code>.</li>
+    <li><strong>Hiển thị:</strong> trang admin gán dữ liệu bằng <code>textContent</code> (không dùng <code>innerHTML</code> với dữ liệu người chơi).</li>
+    <li><strong>Log:</strong> chỉ ghi phương thức, đường dẫn (không kèm query <code>q</code>), mã trạng thái, thời gian xử lý. Không ghi thân yêu cầu, mật khẩu, email, số điện thoại, cookie.</li>
+    <li><strong>Biến môi trường</strong> (trong <code>.env</code>, có mẫu <code>.env.example</code>): <code>ADMIN_USERNAME</code>, <code>ADMIN_PASSWORD</code>, <code>POSTGRES_USER</code>, <code>POSTGRES_PASSWORD</code>, <code>POSTGRES_DB</code>, <code>DATABASE_URL</code>.</li>
+  </ul>
+
+  <h2 id="hang-so-2"><span class="num">18</span>Bảng thông số bổ sung <span class="tag new">Mới</span></h2>
+  <p>Phía trình duyệt đặt cùng đối tượng <code>CONFIG</code> của game (mục 9); phía server đặt trong một đối tượng cấu hình riêng của server.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Tên</th><th>Giá trị</th><th>Phía</th><th>Dùng ở</th></tr></thead>
+    <tbody>
+      <tr><td><code>PLAYER_KEY</code></td><td><code>"dapToi.player"</code></td><td>Trình duyệt</td><td>Ghi nhớ người chơi</td></tr>
+      <tr><td><code>BOOT_TIMEOUT_MS</code></td><td>3 000</td><td>Trình duyệt</td><td>Chờ server xác nhận người chơi khi mở game</td></tr>
+      <tr><td><code>NAME_MIN</code> / <code>NAME_MAX</code></td><td>2 / 100</td><td>Cả hai</td><td>Độ dài họ tên</td></tr>
+      <tr><td><code>EMAIL_MAX</code></td><td>254</td><td>Cả hai</td><td>Độ dài email</td></tr>
+      <tr><td><code>PHONE_PATTERN</code></td><td><code>^0[35789][0-9]{8}$</code></td><td>Cả hai</td><td>Số điện thoại</td></tr>
+      <tr><td><code>BODY_MAX_BYTES</code></td><td>2 048</td><td>Server</td><td>Kích thước tối đa yêu cầu JSON</td></tr>
+      <tr><td><code>REGISTER_MAX</code> / <code>REGISTER_WINDOW_MIN</code></td><td>10 lần / 10 phút</td><td>Server</td><td>Giới hạn đăng ký mỗi IP</td></tr>
+      <tr><td><code>PAGE_SIZE</code></td><td>20</td><td>Server</td><td>Số dòng mỗi trang admin</td></tr>
+      <tr><td><code>SEARCH_MAX</code></td><td>100</td><td>Cả hai</td><td>Độ dài tối đa từ khoá tìm kiếm</td></tr>
+      <tr><td><code>SESSION_HOURS</code></td><td>8</td><td>Server</td><td>Thời hạn phiên admin</td></tr>
+      <tr><td><code>LOGIN_MAX_FAILS</code> / <code>LOGIN_WINDOW_MIN</code> / <code>LOGIN_LOCK_MIN</code></td><td>5 / 15 / 15</td><td>Server</td><td>Khoá đăng nhập admin</td></tr>
+      <tr><td><code>ADMIN_PASSWORD_MIN</code></td><td>12</td><td>Server</td><td>Độ dài tối thiểu mật khẩu admin</td></tr>
+      <tr><td><code>TOAST_MS</code></td><td>4 000</td><td>Trình duyệt (admin)</td><td>Thời gian hiện thông báo “Đã xoá …”</td></tr>
+      <tr><td><code>DISPLAY_TZ</code></td><td><code>"Asia/Ho_Chi_Minh"</code></td><td>Cả hai</td><td>Giờ hiển thị và giờ trong CSV</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2 id="bien-2"><span class="num">19</span>Tình huống biên bổ sung <span class="tag new">Mới</span></h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Tình huống</th><th>Xử lý mong đợi</th></tr></thead>
+    <tbody>
+      <tr><td>Bấm “Đăng ký &amp; chơi” nhiều lần thật nhanh</td><td>Chỉ 1 yêu cầu được gửi (cờ <code>submitting</code>); chỉ 1 bản ghi.</td></tr>
+      <tr><td>Hai trình duyệt đăng ký cùng email gần như cùng lúc</td><td>Nhờ <code>UNIQUE (email)</code> + <code>ON CONFLICT</code>: chỉ 1 bản ghi, mang họ tên / số điện thoại của yêu cầu đến sau.</td></tr>
+      <tr><td>Email giống nhau khác hoa thường (“An@Gmail.com” và “an@gmail.com”)</td><td>Coi là cùng một người (email đã đổi về chữ thường).</td></tr>
+      <tr><td>Admin xoá người chơi đang mở game ở S1/S2/S3</td><td>Lượt đang chơi không bị gián đoạn; lần mở game sau mới về S0.</td></tr>
+      <tr><td>Database dừng khi người chơi đăng ký</td><td>Server trả <code>503</code>; S0 hiện “Không kết nối được máy chủ. Vui lòng thử lại.”; server không bị tắt.</td></tr>
+      <tr><td>Database dừng khi người chơi đã đăng ký mở lại game</td><td><code>GET /api/players/{id}</code> trả <code>503</code> → vẫn vào S1 (mục 11).</td></tr>
+      <tr><td>Mở game bằng <code>file://</code></td><td>Yêu cầu tới API thất bại → S0 hiện lỗi kết nối, không chơi được <strong>(GĐ-6)</strong>.</td></tr>
+      <tr><td>Họ tên chứa <code>&lt;script&gt;</code> hoặc ký tự HTML</td><td>Không qua kiểm tra (ký tự không cho phép). Nếu có dữ liệu cũ như vậy, trang admin vẫn hiện dạng chữ thường, không chạy mã.</td></tr>
+      <tr><td>Từ khoá tìm kiếm là <code>%</code> hoặc <code>_</code></td><td>Tìm đúng ký tự đó (đã thoát), không trả về toàn bộ danh sách.</td></tr>
+      <tr><td>Hai tab admin cùng xoá một người</td><td>Tab sau nhận <code>404</code> → “Người chơi không còn tồn tại.” và tải lại bảng.</td></tr>
+      <tr><td>Xoá dòng cuối cùng của trang cuối</td><td>Tải lại trang trước đó (mục 14.3: trang vượt quá thì dùng trang cuối).</td></tr>
+      <tr><td>Xuất CSV khi có hàng nghìn người chơi</td><td>Server ghi file theo từng phần (stream), không giữ toàn bộ trong bộ nhớ.</td></tr>
+      <tr><td>Phiên admin hết hạn khi đang ở A2</td><td>Thao tác kế tiếp nhận <code>401</code> → chuyển A1, báo “Phiên đăng nhập đã hết hạn.”</td></tr>
+      <tr><td>Khởi động lại container <code>app</code> / <code>db</code></td><td>Dữ liệu người chơi và phiên admin còn nguyên (volume); bộ đếm khoá đăng nhập và giới hạn đăng ký được đặt lại.</td></tr>
     </tbody>
   </table></div>
 

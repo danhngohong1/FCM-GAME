@@ -36,6 +36,8 @@
       <li><a href="#tong-hop">Bảng tổng hợp</a></li>
       <li><a href="#chi-tiet">Chi tiết chức năng</a></li>
       <li><a href="#phi-chuc-nang">Yêu cầu phi chức năng</a></li>
+      <li><a href="#dang-ky-admin">Đăng ký người chơi &amp; trang quản trị</a> <span class="tag new">Mới</span></li>
+      <li><a href="#phi-chuc-nang-2">Yêu cầu phi chức năng bổ sung</a> <span class="tag new">Mới</span></li>
     </ol>
   </nav>
 
@@ -162,6 +164,124 @@
         <tr><td class="id">NF-06</td><td>Không thư viện ngoài</td><td>Chỉ HTML, CSS, JavaScript thuần (DoD 18).</td></tr>
         <tr><td class="id">NF-07</td><td>Trợ năng</td><td>Nút và ô là thẻ <code>&lt;button&gt;</code>, dùng được bằng bàn phím; tương phản chữ đạt WCAG AA.</td></tr>
         <tr><td class="id">NF-08</td><td>Ngôn ngữ</td><td>Toàn bộ chữ trong game là tiếng Việt có dấu.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ================= Bổ sung: Đăng ký người chơi & trang quản trị ================= -->
+
+  <h2 id="dang-ky-admin"><span class="num">5</span>Đăng ký người chơi &amp; trang quản trị <span class="tag new">Mới</span></h2>
+  <p>Người chơi nhập họ tên, email, số điện thoại trước khi chơi; dữ liệu lưu vào cơ sở dữ liệu PostgreSQL. Quản trị viên đăng nhập trang admin để xem, tìm kiếm, xoá và xuất danh sách ra file CSV. Phạm vi đã chốt:</p>
+  <ul>
+    <li><strong>Database:</strong> PostgreSQL, chạy thành dịch vụ <code>db</code> trong Docker Compose cạnh dịch vụ <code>app</code>; dữ liệu nằm trong volume.</li>
+    <li><strong>Đăng ký 1 lần cho mỗi trình duyệt:</strong> trình duyệt ghi nhớ người chơi; lần sau mở game vào thẳng màn hình Bắt đầu.</li>
+    <li><strong>Không lưu điểm lên server:</strong> điểm và kỷ lục vẫn chỉ ở <code>localStorage</code> như F-09.</li>
+    <li><strong>Admin:</strong> một tài khoản duy nhất, tên và mật khẩu lấy từ biến môi trường.</li>
+  </ul>
+
+  <div class="callout decide">
+    <span class="eyebrow">Giả định đã xác nhận · 19/11/2026</span>
+    <p>Những điểm dưới đây không có trong yêu cầu ban đầu; chủ dự án đã đồng ý cả 7 phương án. Đánh dấu <strong>(GĐ)</strong> ở các chỗ liên quan trong trang 02–05.</p>
+    <ul>
+      <li><strong>GĐ-1:</strong> Email là định danh người chơi. Đăng ký lại với email đã có thì <strong>cập nhật</strong> họ tên, số điện thoại của bản ghi cũ, không tạo bản ghi mới.</li>
+      <li><strong>GĐ-2:</strong> Có ô đồng ý cho lưu dữ liệu cá nhân, bắt buộc tick (theo tinh thần Nghị định 13/2023/NĐ-CP về bảo vệ dữ liệu cá nhân).</li>
+      <li><strong>GĐ-3:</strong> Chỉ nhận số di động Việt Nam 10 số (đầu 03, 05, 07, 08, 09); nhập <code>+84</code> / <code>84</code> tự đổi về <code>0</code>.</li>
+      <li><strong>GĐ-4:</strong> Màn hình Bắt đầu có liên kết “Không phải bạn? Đổi người chơi” để người khác dùng chung máy đăng ký.</li>
+      <li><strong>GĐ-5:</strong> Xoá là xoá hẳn khỏi database (không có thùng rác), có hộp xác nhận trước khi xoá.</li>
+      <li><strong>GĐ-6:</strong> Từ bản này game cần server để đăng ký: mở bằng <code>file://</code> sẽ không đăng ký được (NF-01 chỉ còn đúng cho bản không có đăng ký).</li>
+      <li><strong>GĐ-7:</strong> Trong file CSV, số điện thoại ghi dạng <code>0912 345 678</code> để Excel không làm mất số 0 ở đầu.</li>
+    </ul>
+  </div>
+
+  <h3 id="tong-hop-2">5.1 Bảng tổng hợp</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th class="id">Mã</th><th>Chức năng</th><th>Ưu tiên</th><th>Phía</th></tr></thead>
+      <tbody>
+        <tr><td class="id">F-12</td><td>Màn hình Đăng ký người chơi</td><td><span class="tag must">Bắt buộc</span></td><td>Game</td></tr>
+        <tr><td class="id">F-13</td><td>Ghi nhớ người chơi trên trình duyệt &amp; đổi người chơi</td><td><span class="tag must">Bắt buộc</span></td><td>Game</td></tr>
+        <tr><td class="id">F-14</td><td>Lưu người chơi vào database (API đăng ký)</td><td><span class="tag must">Bắt buộc</span></td><td>Server</td></tr>
+        <tr><td class="id">F-15</td><td>Đăng nhập / đăng xuất trang admin</td><td><span class="tag must">Bắt buộc</span></td><td>Admin</td></tr>
+        <tr><td class="id">F-16</td><td>Xem danh sách &amp; tìm kiếm người chơi</td><td><span class="tag must">Bắt buộc</span></td><td>Admin</td></tr>
+        <tr><td class="id">F-17</td><td>Xoá người chơi</td><td><span class="tag must">Bắt buộc</span></td><td>Admin</td></tr>
+        <tr><td class="id">F-18</td><td>Xuất danh sách ra file CSV</td><td><span class="tag must">Bắt buộc</span></td><td>Admin</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3 id="f12">F-12 · Màn hình Đăng ký người chơi</h3>
+  <ul>
+    <li>Hiện khi trình duyệt chưa ghi nhớ người chơi nào (xem F-13). Người chơi phải đăng ký xong mới thấy màn hình Bắt đầu.</li>
+    <li>Gồm 3 ô nhập bắt buộc: <strong>Họ và tên</strong>, <strong>Email</strong>, <strong>Số điện thoại</strong>; một ô tick đồng ý lưu dữ liệu <strong>(GĐ-2)</strong>; nút “Đăng ký &amp; chơi”.</li>
+    <li>Kiểm tra dữ liệu theo quy tắc ở <a href="04-quy-tac-du-lieu.html#kiem-tra-nhap">trang 04 · mục 12</a>, ngay khi rời ô và khi bấm nút. Lỗi hiện ngay dưới ô tương ứng; focus chuyển tới ô lỗi đầu tiên.</li>
+    <li>Bấm nút: khoá nút và hiện “Đang gửi…” cho tới khi server trả lời, nên bấm nhiều lần chỉ gửi 1 yêu cầu.</li>
+    <li>Server nhận: ghi nhớ người chơi (F-13) rồi chuyển sang màn hình Bắt đầu. Server báo lỗi dữ liệu: hiện lỗi dưới từng ô. Không kết nối được: hiện thông báo chung và giữ nguyên dữ liệu đã nhập để bấm lại.</li>
+    <li>Không có cách bỏ qua bước đăng ký để chơi.</li>
+  </ul>
+
+  <h3 id="f13">F-13 · Ghi nhớ người chơi &amp; đổi người chơi</h3>
+  <ul>
+    <li>Sau khi đăng ký thành công, lưu mã người chơi và họ tên vào <code>localStorage</code> (khoá <code>dapToi.player</code>). Tải lại trang, đóng mở trình duyệt vẫn nhớ.</li>
+    <li>Mỗi lần mở game: nếu đã nhớ người chơi thì hỏi server mã đó còn tồn tại không. Còn: vào màn hình Bắt đầu. Đã bị admin xoá: quên người chơi và hiện màn hình Đăng ký. Không hỏi được server (mất mạng): vẫn cho vào màn hình Bắt đầu.</li>
+    <li>Màn hình Bắt đầu hiện “Xin chào, {Họ tên}!” và liên kết “Không phải bạn? Đổi người chơi” <strong>(GĐ-4)</strong>: bấm vào thì quên người chơi hiện tại (giữ kỷ lục trên trình duyệt) và về màn hình Đăng ký.</li>
+    <li>Trình duyệt chặn <code>localStorage</code>: mỗi lần tải trang phải đăng ký lại; nhờ GĐ-1 không sinh bản ghi trùng email.</li>
+    <li>Không lưu email, số điện thoại trong <code>localStorage</code>.</li>
+  </ul>
+
+  <h3 id="f14">F-14 · Lưu người chơi vào database</h3>
+  <ul>
+    <li>Server Node.js nhận yêu cầu đăng ký, kiểm tra lại toàn bộ dữ liệu (không tin dữ liệu từ trình duyệt), chuẩn hoá rồi lưu vào bảng <code>players</code> của PostgreSQL.</li>
+    <li>Email chưa có: tạo bản ghi mới. Email đã có: cập nhật họ tên, số điện thoại, thời điểm cập nhật và thời điểm đồng ý <strong>(GĐ-1)</strong>. Cả hai trường hợp trả về cùng một dạng kết quả.</li>
+    <li>Giới hạn số lần đăng ký từ một địa chỉ IP để chống spam (thông số ở trang 04).</li>
+    <li>Database không chạy: trả lỗi 503, game hiện thông báo “Không kết nối được máy chủ. Vui lòng thử lại.”.</li>
+  </ul>
+
+  <h3 id="f15">F-15 · Đăng nhập / đăng xuất trang admin</h3>
+  <ul>
+    <li>Trang admin ở đường dẫn <code>/admin/</code>. Chưa đăng nhập thì mọi trang và API admin chuyển về / trả lỗi 401, kể cả khi gõ thẳng đường dẫn.</li>
+    <li>Một tài khoản duy nhất: tên đăng nhập <code>ADMIN_USERNAME</code>, mật khẩu <code>ADMIN_PASSWORD</code> đặt trong file <code>.env</code> (không commit). Thiếu một trong hai biến hoặc mật khẩu dưới 12 ký tự thì server không khởi động và ghi rõ lý do vào log.</li>
+    <li>Sai tên hoặc mật khẩu: báo chung “Tên đăng nhập hoặc mật khẩu không đúng.”, không nói sai phần nào.</li>
+    <li>Sai liên tiếp quá số lần cho phép từ cùng IP thì khoá đăng nhập tạm thời (thông số ở trang 04).</li>
+    <li>Đăng nhập đúng: tạo phiên lưu trong cookie <code>HttpOnly</code>, <code>SameSite=Strict</code>; phiên hết hạn sau một thời gian cố định. Nút “Đăng xuất” huỷ phiên ngay.</li>
+  </ul>
+
+  <h3 id="f16">F-16 · Xem danh sách &amp; tìm kiếm người chơi</h3>
+  <ul>
+    <li>Bảng gồm: Họ và tên, Email, Số điện thoại, Thời điểm đăng ký, nút Xoá. Mới nhất ở trên. Có tổng số người chơi khớp điều kiện.</li>
+    <li>Chia trang, mỗi trang 20 dòng, có nút Trang trước / Trang sau và “Trang X / Y”.</li>
+    <li>Một ô tìm kiếm chung: tìm chuỗi con trong họ tên, email hoặc số điện thoại; không phân biệt hoa thường và có dấu / không dấu (gõ “nguyen” ra “Nguyễn”). Tìm theo số điện thoại bỏ qua khoảng trắng, dấu chấm, gạch ngang.</li>
+    <li>Kết quả cập nhật khi bấm Enter hoặc nút “Tìm”; ô tìm rỗng thì hiện tất cả. Không có kết quả: hiện “Không tìm thấy người chơi nào.”.</li>
+    <li>Từ khoá tìm kiếm và số trang nằm trên địa chỉ trang (ví dụ <code>/admin/?q=nguyen&amp;page=2</code>) để tải lại vẫn giữ.</li>
+  </ul>
+
+  <h3 id="f17">F-17 · Xoá người chơi</h3>
+  <ul>
+    <li>Mỗi dòng có nút “Xoá”. Bấm vào hiện hộp xác nhận ghi rõ họ tên và email của người sắp xoá, nút “Xoá” (đỏ) và “Huỷ”.</li>
+    <li>Xác nhận: xoá hẳn bản ghi khỏi database <strong>(GĐ-5)</strong>, hiện thông báo “Đã xoá {Họ tên}.” và tải lại trang hiện tại của bảng. Nếu trang hiện tại trống sau khi xoá thì lùi về trang trước.</li>
+    <li>Người đã bị xoá mở lại game sẽ phải đăng ký lại (F-13).</li>
+    <li>Xoá một người đã bị xoá trước đó (hai tab cùng xoá): báo “Người chơi không còn tồn tại.” và tải lại bảng, không báo lỗi hệ thống.</li>
+  </ul>
+
+  <h3 id="f18">F-18 · Xuất danh sách ra file CSV</h3>
+  <ul>
+    <li>Nút “Xuất CSV” tải về file chứa <strong>toàn bộ</strong> người chơi khớp từ khoá tìm kiếm đang áp dụng (không chỉ trang đang xem). Ô tìm rỗng thì xuất tất cả.</li>
+    <li>Cột: Họ và tên, Email, Số điện thoại, Thời điểm đăng ký. Định dạng chi tiết ở <a href="04-quy-tac-du-lieu.html#csv">trang 04 · mục 15</a>; mở bằng Excel hiện đúng tiếng Việt.</li>
+    <li>Tên file: <code>dap-toi-nguoi-choi-YYYYMMDD-HHmm.csv</code> theo giờ Việt Nam.</li>
+    <li>Danh sách rỗng: vẫn tải file chỉ có dòng tiêu đề.</li>
+  </ul>
+
+  <h2 id="phi-chuc-nang-2"><span class="num">6</span>Yêu cầu phi chức năng bổ sung <span class="tag new">Mới</span></h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th class="id">Mã</th><th>Yêu cầu</th><th>Tiêu chí</th></tr></thead>
+      <tbody>
+        <tr><td class="id">NF-09</td><td>Cần server</td><td>Game và admin chạy qua server Node.js (<code>http://localhost:3000</code>). Mở bằng <code>file://</code> thì màn hình Đăng ký báo không kết nối được máy chủ <strong>(GĐ-6)</strong>.</td></tr>
+        <tr><td class="id">NF-10</td><td>Docker Compose</td><td>Compose có 2 dịch vụ: <code>app</code> và <code>db</code> (PostgreSQL). Dữ liệu nằm trong volume, còn nguyên sau <code>docker compose down</code> rồi <code>up</code> (chỉ mất khi thêm <code>-v</code>). <code>app</code> chờ <code>db</code> sẵn sàng rồi mới nhận yêu cầu.</td></tr>
+        <tr><td class="id">NF-11</td><td>Thư viện</td><td>Phía trình duyệt (game và admin) vẫn là HTML, CSS, JavaScript thuần như NF-06. Phía server chỉ thêm thư viện kết nối PostgreSQL (<code>pg</code>).</td></tr>
+        <tr><td class="id">NF-12</td><td>Bí mật</td><td>Mật khẩu admin và database chỉ nằm trong <code>.env</code> (có trong <code>.gitignore</code>); repo có file mẫu <code>.env.example</code> không chứa giá trị thật. Không ghi mật khẩu, email, số điện thoại ra log.</td></tr>
+        <tr><td class="id">NF-13</td><td>An toàn dữ liệu</td><td>Mọi câu lệnh SQL dùng tham số (không ghép chuỗi). Dữ liệu hiển thị trên trang admin được thoát ký tự HTML. API thay đổi dữ liệu kiểm tra phiên và nguồn gửi (<code>Origin</code>).</td></tr>
+        <tr><td class="id">NF-14</td><td>Riêng tư</td><td>Chỉ thu 3 trường bắt buộc và thời điểm đồng ý; không thu thêm. Dữ liệu cá nhân chỉ xem được sau khi đăng nhập admin.</td></tr>
+        <tr><td class="id">NF-15</td><td>Giao diện</td><td>Màn hình Đăng ký và trang admin dùng <code>design/tokens.css</code>, tuân theo các tiêu chí UI-01 → UI-09 ở trang 06; co giãn từ 320 px. Toàn bộ chữ tiếng Việt có dấu.</td></tr>
       </tbody>
     </table>
   </div>

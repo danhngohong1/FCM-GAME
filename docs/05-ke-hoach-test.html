@@ -38,6 +38,10 @@
       <li><a href="#logic">Kiểm thử logic tự động</a></li>
       <li><a href="#dod">Đối chiếu tiêu chí hoàn thành</a></li>
       <li><a href="#tieu-chi">Tiêu chí đạt &amp; báo lỗi</a></li>
+      <li><a href="#dk-chien-luoc">Chiến lược &amp; môi trường bổ sung</a> <span class="tag new">Mới</span></li>
+      <li><a href="#dk-ca-test">Ca kiểm thử đăng ký &amp; admin</a> <span class="tag new">Mới</span></li>
+      <li><a href="#dk-tu-dong">Kiểm thử tự động bổ sung</a> <span class="tag new">Mới</span></li>
+      <li><a href="#dk-dod">Tiêu chí hoàn thành bổ sung</a> <span class="tag new">Mới</span></li>
     </ol>
   </nav>
 
@@ -195,6 +199,189 @@
     <li><strong>Mức độ lỗi:</strong> <em>Nghiêm trọng</em> (treo game, tính sai điểm, đồng hồ sai) · <em>Cao</em> (một chức năng bắt buộc không chạy trên một trình duyệt) · <em>Trung bình</em> (hiệu ứng sai) · <em>Thấp</em> (lệch giao diện nhỏ).</li>
     <li><strong>Báo lỗi gồm:</strong> mã ca test, thiết bị và trình duyệt, các bước tái hiện, kết quả thực tế so với mong đợi, ảnh hoặc video, nội dung Console nếu có.</li>
   </ul>
+
+  <!-- ================= Bổ sung: Đăng ký người chơi & trang quản trị ================= -->
+
+  <h2 id="dk-chien-luoc"><span class="num">7</span>Chiến lược &amp; môi trường bổ sung <span class="tag new">Mới</span></h2>
+  <p>Kiểm thử cho chức năng F-12 → F-18 và NF-09 → NF-15 (<a href="02-chuc-nang.html#dang-ky-admin">trang 02 · mục 5–6</a>). Các giả định GĐ-1 → GĐ-7 đã được xác nhận (19/11/2026) và được kiểm thử đúng như ghi trong tài liệu.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Loại</th><th>Mục đích</th><th>Cách làm</th></tr></thead>
+    <tbody>
+      <tr><td>Kiểm thử tự động phía trình duyệt</td><td>Kiểm tra dữ liệu nhập, đọc <code>dapToi.player</code>, chuyển trạng thái khi mở game</td><td>Thêm vào <code>app/test.html</code> như UT-01 → UT-09; giả lập <code>fetch</code></td></tr>
+      <tr><td>Kiểm thử tự động phía server</td><td>Chuẩn hoá dữ liệu, tạo CSV, giới hạn số lần, khoá đăng nhập</td><td>Trình chạy test có sẵn của Node.js (<code>node --test</code>), đồng hồ giả</td></tr>
+      <tr><td>Kiểm thử tích hợp API</td><td>API + PostgreSQL thật chạy đúng với nhau</td><td>Chạy trên Docker Compose với database test riêng (xoá sạch trước mỗi lượt)</td></tr>
+      <tr><td>Kiểm thử thủ công</td><td>Luồng màn hình, giao diện, Excel, Docker</td><td>Theo ca TC-39 → TC-81 ở mục 8</td></tr>
+      <tr><td>Kiểm thử hồi quy game</td><td>Thêm đăng ký không làm hỏng game</td><td>Chạy lại TC-01 → TC-38 và UT-01 → UT-09 (TC-80)</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>7.1 Môi trường bổ sung</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Thành phần</th><th>Cấu hình</th></tr></thead>
+    <tbody>
+      <tr><td>Chạy ứng dụng</td><td><code>docker compose up -d --build</code> với file <code>.env</code> tạo từ <code>.env.example</code>; mở game ở <code>http://localhost:3000</code>, admin ở <code>http://localhost:3000/admin/</code>.</td></tr>
+      <tr><td>Dữ liệu mẫu</td><td>Bộ 45 người chơi mẫu (có họ tên có dấu, không dấu, chứa <code>'</code>, <code>-</code>, dấu phẩy; email nhiều kiểu; số điện thoại đủ các đầu 03/05/07/08/09), nạp bằng script trong thư mục test; không dùng dữ liệu người thật.</td></tr>
+      <tr><td>Phần mềm mở CSV</td><td>Microsoft Excel trên Windows (bắt buộc), LibreOffice Calc hoặc Google Sheets (tham khảo).</td></tr>
+      <tr><td>Thiết bị</td><td>Như mục 2. Màn hình admin kiểm tra chính ở 1366×768 và 1920×1080, phụ ở 320×568.</td></tr>
+      <tr><td>Dừng / bật database</td><td><code>docker compose stop db</code> / <code>docker compose start db</code>.</td></tr>
+    </tbody>
+  </table></div>
+  <div class="callout warn">
+    <span class="eyebrow">Lưu ý với ca cũ</span>
+    <p>Từ bản có đăng ký, TC-01 và các ca mở game bằng <code>file://</code> ở mục 2 sẽ dừng ở màn hình Đăng ký với lỗi kết nối <strong>(GĐ-6)</strong>. Khi chạy hồi quy (TC-80), mở game qua <code>http://localhost:3000</code> và đăng ký một người chơi mẫu trước; mọi kết quả mong đợi khác của TC-01 → TC-38 giữ nguyên.</p>
+  </div>
+
+  <h2 id="dk-ca-test"><span class="num">8</span>Ca kiểm thử đăng ký &amp; admin <span class="tag new">Mới</span></h2>
+
+  <h3>8.1 Màn hình Đăng ký (S0)</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th class="id">Mã</th><th>Ưu tiên</th><th>Các bước</th><th>Kết quả mong đợi</th><th>Liên quan</th></tr></thead>
+    <tbody>
+      <tr><td class="id">TC-39</td><td><span class="tag must">P1</span></td><td>Xoá dữ liệu trang, mở <code>http://localhost:3000</code>, mở Console.</td><td>Hiện S0: ảnh, “Đập Tôi”, 3 ô, ô đồng ý, nút “Đăng ký &amp; chơi”; focus ở ô Họ và tên; không vào được S1; Console không lỗi.</td><td>F-12 · DK-1</td></tr>
+      <tr><td class="id">TC-40</td><td><span class="tag must">P1</span></td><td>Nhập “Nguyễn Văn An”, “an.nguyen@gmail.com”, “0912345678”, tick đồng ý, bấm nút.</td><td>Sang S1, hiện “Xin chào, Nguyễn Văn An!”, focus “Bắt đầu”. Trang admin có đúng 1 dòng với dữ liệu trên.</td><td>F-12, F-14 · DK-1, DK-2</td></tr>
+      <tr><td class="id">TC-41</td><td><span class="tag must">P1</span></td><td>Để trống tất cả, bấm nút; xem tab Network.</td><td>4 lỗi “Vui lòng nhập…” / “Bạn cần đồng ý…” dưới đúng ô; focus ô đầu tiên; <strong>không</strong> có yêu cầu nào gửi đi.</td><td>F-12 · DK-1</td></tr>
+      <tr><td class="id">TC-42</td><td><span class="tag must">P1</span></td><td>Lần lượt nhập: họ tên “A”, “An123”; email “an@gmail”, “an gmail.com”; số điện thoại “091234567”, “0212345678”, “09123456789”.</td><td>Mỗi giá trị hiện đúng câu lỗi ở trang 03 · mục 12; không gửi được.</td><td>F-12 · DK-1</td></tr>
+      <tr><td class="id">TC-43</td><td><span class="tag should">P2</span></td><td>Nhập “  nguyễn   văn  bình ”, “ Binh@Example.COM ”, “+84 912.345.678”; đăng ký.</td><td>Được nhận. Admin thấy “nguyễn văn bình”, “binh@example.com”, “0912345678”.</td><td>F-14 · GĐ-3</td></tr>
+      <tr><td class="id">TC-44</td><td><span class="tag must">P1</span></td><td>Điền đúng, bấm nút 5 lần thật nhanh (bật Network throttling “Slow 3G”).</td><td>Nút đổi “Đang gửi…” và khoá; chỉ 1 yêu cầu <code>POST /api/players</code>; 1 bản ghi.</td><td>F-12 · DK-2</td></tr>
+      <tr><td class="id">TC-45</td><td><span class="tag must">P1</span></td><td>Ở trình duyệt khác, đăng ký lại email của TC-40 với họ tên “An Nguyễn” và số “0987654321”.</td><td>Vẫn chỉ 1 dòng cho email đó; họ tên và số điện thoại đã đổi; “Đăng ký lúc” giữ nguyên lần đầu.</td><td>F-14 · GĐ-1 · DK-2</td></tr>
+      <tr><td class="id">TC-46</td><td><span class="tag must">P1</span></td><td><code>docker compose stop db</code>, đăng ký người mới; sau đó <code>docker compose start db</code>, bấm lại nút.</td><td>Lần 1: “Không kết nối được máy chủ. Vui lòng thử lại.”, dữ liệu đã nhập còn nguyên, container <code>app</code> vẫn chạy. Lần 2: đăng ký thành công.</td><td>F-14 · DK-2</td></tr>
+      <tr><td class="id">TC-47</td><td><span class="tag should">P2</span></td><td>Từ một máy, đăng ký 11 lần (email khác nhau) trong 10 phút.</td><td>Lần thứ 11 báo “Bạn gửi quá nhiều lần…”; sau 10 phút đăng ký lại được.</td><td>F-14</td></tr>
+      <tr><td class="id">TC-48</td><td><span class="tag should">P2</span></td><td>(Điện thoại 320×568, iPhone) Mở S0, chạm từng ô.</td><td>Form và nút nằm gọn khi bàn phím chưa bật; iPhone không tự phóng to khi chạm ô; ô email hiện bàn phím có “@”, ô số điện thoại hiện bàn phím số.</td><td>F-12, NF-15</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>8.2 Ghi nhớ &amp; đổi người chơi</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th class="id">Mã</th><th>Ưu tiên</th><th>Các bước</th><th>Kết quả mong đợi</th><th>Liên quan</th></tr></thead>
+    <tbody>
+      <tr><td class="id">TC-49</td><td><span class="tag must">P1</span></td><td>Sau TC-40, tải lại trang; đóng trình duyệt rồi mở lại.</td><td>Cả hai lần vào thẳng S1 với lời chào, không qua S0. <code>localStorage</code> chỉ có <code>id</code> và họ tên, không có email / số điện thoại.</td><td>F-13 · DK-3</td></tr>
+      <tr><td class="id">TC-50</td><td><span class="tag must">P1</span></td><td>Có kỷ lục N &gt; 0. Ở S1 bấm “Không phải bạn? Đổi người chơi”, đăng ký người khác.</td><td>Về S0 với form trống; sau khi đăng ký, S1 chào người mới và vẫn hiện “Kỷ lục: N”.</td><td>F-13 · GĐ-4 · DK-3</td></tr>
+      <tr><td class="id">TC-51</td><td><span class="tag must">P1</span></td><td>Admin xoá người chơi đang được nhớ; người chơi tải lại game.</td><td>Hiện S0; <code>dapToi.player</code> đã bị xoá.</td><td>F-13, F-17 · DK-3</td></tr>
+      <tr><td class="id">TC-52</td><td><span class="tag should">P2</span></td><td>Người chơi đã đăng ký; <code>docker compose stop db</code>; tải lại game.</td><td>Sau tối đa 3 giây “Đang tải…”, vào S1 với họ tên đã nhớ, chơi được bình thường.</td><td>F-13</td></tr>
+      <tr><td class="id">TC-53</td><td><span class="tag should">P2</span></td><td>Sửa tay <code>dapToi.player</code> thành <code>abc</code>, <code>{}</code>, <code>{"id":"123","fullName":"X"}</code>; tải lại mỗi lần.</td><td>Hiện S0, khoá hỏng bị xoá, Console không lỗi.</td><td>F-13</td></tr>
+      <tr><td class="id">TC-54</td><td><span class="tag should">P2</span></td><td>Chặn bộ nhớ trang (hoặc cửa sổ ẩn danh chặn cookie &amp; dữ liệu trang), đăng ký 2 lần cùng email qua 2 lần tải trang.</td><td>Mỗi lần tải trang đều phải đăng ký; admin chỉ có 1 dòng cho email đó; game vẫn chơi được.</td><td>F-13 · GĐ-1</td></tr>
+      <tr><td class="id">TC-55</td><td><span class="tag should">P2</span></td><td>Nhấp đúp <code>app/index.html</code> (đường dẫn <code>file://</code>), đăng ký.</td><td>S0 báo lỗi kết nối; không vào được S1.</td><td>NF-09 · GĐ-6</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>8.3 Đăng nhập admin</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th class="id">Mã</th><th>Ưu tiên</th><th>Các bước</th><th>Kết quả mong đợi</th><th>Liên quan</th></tr></thead>
+    <tbody>
+      <tr><td class="id">TC-56</td><td><span class="tag must">P1</span></td><td>Chưa đăng nhập: mở <code>/admin/</code>; gọi thẳng <code>/admin/api/players</code>, <code>/admin/api/players.csv</code>.</td><td>Trang chuyển về <code>/admin/login</code>; hai API trả <code>401</code>, không lộ dữ liệu.</td><td>F-15 · DK-4</td></tr>
+      <tr><td class="id">TC-57</td><td><span class="tag must">P1</span></td><td>Nhập sai mật khẩu; nhập sai tên; rồi nhập đúng.</td><td>Hai lần sai cùng một câu “Tên đăng nhập hoặc mật khẩu không đúng.”, ô mật khẩu bị xoá; lần đúng vào A2.</td><td>F-15 · DK-4</td></tr>
+      <tr><td class="id">TC-58</td><td><span class="tag must">P1</span></td><td>Sai mật khẩu 5 lần, lần 6 nhập đúng; chờ 15 phút rồi nhập đúng.</td><td>Lần 6 vẫn bị chặn “Đăng nhập sai quá nhiều lần. Thử lại sau {M} phút.”; sau 15 phút vào được.</td><td>F-15 · DK-4</td></tr>
+      <tr><td class="id">TC-59</td><td><span class="tag must">P1</span></td><td>Đăng nhập, chép giá trị cookie <code>dapToi.admin</code>; bấm “Đăng xuất”; bấm Back; gửi lại yêu cầu API với cookie đã chép.</td><td>Về A1; Back không hiện dữ liệu; yêu cầu với cookie cũ trả <code>401</code>.</td><td>F-15 · DK-4</td></tr>
+      <tr><td class="id">TC-60</td><td><span class="tag should">P2</span></td><td>Đăng nhập, đổi <code>expires_at</code> của phiên trong database về quá khứ, bấm “Tìm”.</td><td>Chuyển A1 với “Phiên đăng nhập đã hết hạn.”</td><td>F-15</td></tr>
+      <tr><td class="id">TC-61</td><td><span class="tag must">P1</span></td><td>Bỏ <code>ADMIN_PASSWORD</code> khỏi <code>.env</code>, rồi đặt mật khẩu 8 ký tự; mỗi lần <code>docker compose up -d app</code> và xem log.</td><td>Container <code>app</code> không chạy; log ghi rõ thiếu biến / mật khẩu quá ngắn; log không in giá trị mật khẩu.</td><td>F-15, NF-12 · DK-4</td></tr>
+      <tr><td class="id">TC-62</td><td><span class="tag should">P2</span></td><td>DevTools → Application → Cookies sau khi đăng nhập.</td><td>Cookie <code>dapToi.admin</code> có <code>HttpOnly</code>, <code>SameSite=Strict</code>, <code>Path=/admin</code>; <code>document.cookie</code> không đọc được.</td><td>F-15, NF-13</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>8.4 Danh sách &amp; tìm kiếm</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th class="id">Mã</th><th>Ưu tiên</th><th>Các bước</th><th>Kết quả mong đợi</th><th>Liên quan</th></tr></thead>
+    <tbody>
+      <tr><td class="id">TC-63</td><td><span class="tag must">P1</span></td><td>Nạp 45 người chơi mẫu, mở A2, đi hết các trang.</td><td>“45 người chơi”; 3 trang 20 / 20 / 5 dòng; mới nhất ở đầu trang 1; nút “Trang trước” khoá ở trang 1, “Trang sau” khoá ở trang 3; giờ hiển thị đúng giờ Việt Nam.</td><td>F-16 · DK-5</td></tr>
+      <tr><td class="id">TC-64</td><td><span class="tag must">P1</span></td><td>Tìm lần lượt: “nguyen”, “NGUYỄN”, “gmail.com”, “0912 345”, “0912.345”.</td><td>“nguyen” và “NGUYỄN” cho cùng kết quả (có “Nguyễn…”); “gmail.com” khớp theo email; hai từ khoá số điện thoại cùng tìm thấy “0912345678”; dòng tổng ghi “… khớp “{từ khoá}””.</td><td>F-16 · DK-5</td></tr>
+      <tr><td class="id">TC-65</td><td><span class="tag should">P2</span></td><td>Tìm “%”, “_”, “' OR 1=1 --”, “zzzz”.</td><td>Không trả về toàn bộ danh sách, không lỗi 500; “Không tìm thấy người chơi nào.” khi không khớp.</td><td>F-16, NF-13</td></tr>
+      <tr><td class="id">TC-66</td><td><span class="tag should">P2</span></td><td>Tìm “an”, sang trang 2, tải lại trang; gõ tay <code>?page=99</code>.</td><td>Tải lại vẫn ở “an” trang 2; <code>page=99</code> hiện trang cuối.</td><td>F-16</td></tr>
+      <tr><td class="id">TC-67</td><td><span class="tag must">P1</span></td><td>Chèn thẳng vào database một dòng có họ tên <code>&lt;img src=x onerror=alert(1)&gt;</code>; mở A2.</td><td>Hiện đúng chuỗi chữ đó, không bật hộp thoại, không tải ảnh.</td><td>NF-13 · DK-9</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>8.5 Xoá người chơi</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th class="id">Mã</th><th>Ưu tiên</th><th>Các bước</th><th>Kết quả mong đợi</th><th>Liên quan</th></tr></thead>
+    <tbody>
+      <tr><td class="id">TC-68</td><td><span class="tag must">P1</span></td><td>Bấm “Xoá” ở một dòng; bấm “Huỷ”; bấm “Xoá” lần nữa và xác nhận.</td><td>Hộp A3 ghi đúng họ tên và email; “Huỷ” không đổi gì; xác nhận thì dòng biến mất, hiện “Đã xoá {Họ tên}.”, tổng giảm 1; database không còn dòng đó.</td><td>F-17 · DK-6</td></tr>
+      <tr><td class="id">TC-69</td><td><span class="tag should">P2</span></td><td>Mở A2 ở 2 tab, cùng xoá một người: tab 1 trước, tab 2 sau.</td><td>Tab 2 báo “Người chơi không còn tồn tại.” và tải lại bảng.</td><td>F-17</td></tr>
+      <tr><td class="id">TC-70</td><td><span class="tag should">P2</span></td><td>Có 41 người (trang 3 có 1 dòng); ở trang 3 xoá dòng đó.</td><td>Bảng chuyển về trang 2.</td><td>F-17</td></tr>
+      <tr><td class="id">TC-71</td><td><span class="tag should">P2</span></td><td>Chỉ dùng bàn phím: Tab tới “Xoá”, Enter; Esc; mở lại, Tab tới “Xoá” trong hộp, Enter.</td><td>Hộp mở với focus ở “Huỷ”; Esc đóng hộp, focus về nút “Xoá” của dòng; lần sau xoá thành công.</td><td>F-17, NF-07</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>8.6 Xuất CSV</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th class="id">Mã</th><th>Ưu tiên</th><th>Các bước</th><th>Kết quả mong đợi</th><th>Liên quan</th></tr></thead>
+    <tbody>
+      <tr><td class="id">TC-72</td><td><span class="tag must">P1</span></td><td>Với 45 người mẫu, không lọc, bấm “Xuất CSV”; mở file bằng Excel trên Windows.</td><td>Tên file <code>dap-toi-nguoi-choi-YYYYMMDD-HHmm.csv</code>; Excel hiện đúng tiếng Việt, 4 cột, 1 dòng tiêu đề + 45 dòng; số điện thoại giữ số 0 ở đầu; thời điểm theo giờ Việt Nam.</td><td>F-18 · DK-7</td></tr>
+      <tr><td class="id">TC-73</td><td><span class="tag must">P1</span></td><td>Tìm “nguyen” (khớp nhiều hơn 20 người), bấm “Xuất CSV”.</td><td>File chứa <strong>tất cả</strong> người khớp (không chỉ 20 dòng trang đang xem), cùng thứ tự với A2.</td><td>F-18 · DK-7</td></tr>
+      <tr><td class="id">TC-74</td><td><span class="tag should">P2</span></td><td>Có người tên “O'Brien, Mary”; chèn thẳng database người tên <code>=1+1</code>; xuất CSV, mở Excel.</td><td>“O'Brien, Mary” nằm gọn trong 1 ô; ô <code>=1+1</code> hiện dạng chữ <code>'=1+1</code> / <code>=1+1</code>, không ra 2.</td><td>F-18, NF-13</td></tr>
+      <tr><td class="id">TC-75</td><td><span class="tag should">P2</span></td><td>Tìm “zzzz” (không khớp), xuất CSV.</td><td>File chỉ có dòng tiêu đề.</td><td>F-18</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>8.7 Docker, bảo mật &amp; hồi quy</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th class="id">Mã</th><th>Ưu tiên</th><th>Các bước</th><th>Kết quả mong đợi</th><th>Liên quan</th></tr></thead>
+    <tbody>
+      <tr><td class="id">TC-76</td><td><span class="tag must">P1</span></td><td>Máy sạch: chép <code>.env.example</code> thành <code>.env</code>, điền mật khẩu, <code>docker compose up -d --build</code>; <code>docker compose ps</code>.</td><td>2 dịch vụ <code>app</code>, <code>db</code> đều chạy (healthy); game và admin mở được ở cổng 3000.</td><td>NF-10 · DK-8</td></tr>
+      <tr><td class="id">TC-77</td><td><span class="tag must">P1</span></td><td>Có dữ liệu; <code>docker compose down</code> rồi <code>up -d</code>; sau đó <code>down -v</code> rồi <code>up -d</code>.</td><td>Lần 1 dữ liệu và phiên admin còn nguyên; lần 2 database trống.</td><td>NF-10 · DK-8</td></tr>
+      <tr><td class="id">TC-78</td><td><span class="tag must">P1</span></td><td>Kiểm tra repo (<code>git ls-files</code>, nội dung <code>.env.example</code>); đăng ký 1 người, đăng nhập admin, tìm, xuất CSV; đọc <code>docker compose logs</code>.</td><td><code>.env</code> không có trong repo, <code>.env.example</code> không chứa mật khẩu thật; log không có mật khẩu, email, số điện thoại, từ khoá tìm kiếm, cookie.</td><td>NF-12, NF-14 · DK-9</td></tr>
+      <tr><td class="id">TC-79</td><td><span class="tag should">P2</span></td><td>Gửi <code>POST /api/players</code> và <code>DELETE /admin/api/players/{id}</code> (có cookie hợp lệ) với header <code>Origin: https://evil.example</code>, và không có <code>Origin</code>.</td><td>Cả hai trả <code>403</code>; dữ liệu không đổi.</td><td>NF-13 · DK-9</td></tr>
+      <tr><td class="id">TC-80</td><td><span class="tag must">P1</span></td><td>Đăng ký 1 người chơi rồi chạy lại TC-01 → TC-38 (mở qua <code>http://localhost:3000</code>) và UT-01 → UT-09.</td><td>Kết quả như trước khi có đăng ký.</td><td>DK-10</td></tr>
+      <tr><td class="id">TC-81</td><td><span class="tag">P3</span></td><td>Mở A1, A2, A3 ở 320×568.</td><td>Trang không cuộn ngang; bảng cuộn ngang trong khung riêng; nút vẫn bấm được.</td><td>NF-15</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2 id="dk-tu-dong"><span class="num">9</span>Kiểm thử tự động bổ sung <span class="tag new">Mới</span></h2>
+
+  <h3>9.1 Kiểm thử đơn vị (UT)</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th class="id">Mã</th><th>Phía</th><th>Nội dung kiểm thử</th><th>Kỳ vọng</th></tr></thead>
+    <tbody>
+      <tr><td class="id">UT-10</td><td>Cả hai</td><td>Chuẩn hoá &amp; kiểm tra họ tên với: <code>""</code>, <code>"A"</code>, <code>"  nguyễn   văn An "</code>, <code>"An123"</code>, <code>"O'Brien-Smith"</code>, chuỗi 100 và 101 ký tự, tên tổ hợp dấu (NFD)</td><td>Lỗi rỗng, lỗi độ dài, “nguyễn văn An” ✓, lỗi ký tự, ✓, ✓ / lỗi độ dài, đổi về NFC ✓.</td></tr>
+      <tr><td class="id">UT-11</td><td>Cả hai</td><td>Email: <code>" An@Gmail.COM "</code>, <code>"an@gmail"</code>, <code>"an gmail.com"</code>, <code>"a@b.c"</code>, chuỗi 255 ký tự</td><td><code>"an@gmail.com"</code> ✓, ✗, ✗, ✗, ✗.</td></tr>
+      <tr><td class="id">UT-12</td><td>Cả hai</td><td>Số điện thoại: <code>"0912345678"</code>, <code>"+84 912 345 678"</code>, <code>"84912345678"</code>, <code>"(091) 234-5678"</code>, <code>"0212345678"</code>, <code>"091234567"</code>, <code>"09123456789"</code></td><td>4 giá trị đầu đều thành <code>"0912345678"</code> ✓; 3 giá trị sau ✗ với đúng câu lỗi.</td></tr>
+      <tr><td class="id">UT-13</td><td>Cả hai</td><td>Đồng ý: <code>true</code>, <code>false</code>, <code>"true"</code>, <code>1</code>, thiếu</td><td>Chỉ <code>true</code> hợp lệ.</td></tr>
+      <tr><td class="id">UT-14</td><td>Trình duyệt</td><td>Đọc <code>dapToi.player</code> với <code>null</code>, <code>"abc"</code>, <code>"{}"</code>, id không phải UUID, họ tên rỗng, giá trị hợp lệ</td><td>5 trường hợp đầu coi như chưa có (và xoá khoá); trường hợp cuối trả về đúng đối tượng.</td></tr>
+      <tr><td class="id">UT-15</td><td>Trình duyệt</td><td>Chuyển trạng thái <code>BOOT</code> với <code>fetch</code> giả trả 200, 404, 503, lỗi mạng, không trả lời quá 3 000 ms (đồng hồ giả)</td><td>IDLE, REGISTER (đã xoá khoá), IDLE, IDLE, IDLE đúng lúc 3 000 ms.</td></tr>
+      <tr><td class="id">UT-16</td><td>Trình duyệt</td><td>Gửi đăng ký 5 lần liên tiếp khi lần đầu chưa trả lời</td><td><code>fetch</code> chỉ được gọi 1 lần.</td></tr>
+      <tr><td class="id">UT-17</td><td>Server</td><td>Tạo CSV từ các dòng mẫu: họ tên có dấu phẩy, dấu <code>"</code>, xuống dòng, bắt đầu bằng <code>=</code> <code>+</code> <code>-</code> <code>@</code>; thời điểm UTC <code>2026-11-18T14:04:37Z</code>; danh sách rỗng</td><td>Có BOM, <code>CRLF</code>, ngoặc kép và nhân đôi <code>"</code> đúng, có <code>'</code> chống công thức, số điện thoại dạng <code>0912 345 678</code>, thời điểm <code>18/11/2026 21:04:37</code>; rỗng chỉ có tiêu đề.</td></tr>
+      <tr><td class="id">UT-18</td><td>Server</td><td>Xử lý từ khoá tìm kiếm: <code>"  Nguyễn "</code>, <code>"50%"</code>, <code>"a_b"</code>, <code>"0912 345"</code>, <code>"12"</code>, chuỗi 150 ký tự</td><td>Bỏ khoảng trắng; thoát <code>%</code> <code>_</code>; lấy được dãy số <code>"0912345"</code>; <code>"12"</code> (dưới 3 chữ số) không tìm theo số điện thoại; cắt còn 100 ký tự.</td></tr>
+      <tr><td class="id">UT-19</td><td>Server</td><td>Bộ đếm khoá đăng nhập với đồng hồ giả: 5 lần sai, lần 6 đúng; tiến 15 phút; đúng</td><td>Lần 6 bị khoá; sau 15 phút mở khoá; đăng nhập đúng xoá bộ đếm.</td></tr>
+      <tr><td class="id">UT-20</td><td>Server</td><td>Giới hạn đăng ký với đồng hồ giả: 11 lần trong 10 phút, rồi tiến thời gian</td><td>Lần 11 bị chặn; hết cửa sổ 10 phút thì cho phép lại.</td></tr>
+      <tr><td class="id">UT-21</td><td>Server</td><td>Đọc cấu hình khi khởi động: thiếu <code>ADMIN_USERNAME</code>, thiếu <code>ADMIN_PASSWORD</code>, mật khẩu 11 ký tự, đủ</td><td>3 trường hợp đầu báo lỗi rõ ràng (không in mật khẩu); trường hợp cuối hợp lệ.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>9.2 Kiểm thử tích hợp API (IT) với PostgreSQL thật</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th class="id">Mã</th><th>Nội dung kiểm thử</th><th>Kỳ vọng</th></tr></thead>
+    <tbody>
+      <tr><td class="id">IT-01</td><td><code>POST /api/players</code> hợp lệ; gửi lại cùng email (khác hoa thường) với họ tên khác</td><td><code>201</code> rồi <code>200</code>, cùng <code>id</code>; database có 1 dòng, dữ liệu đã chuẩn hoá, <code>created_at</code> không đổi, <code>updated_at</code> tăng.</td></tr>
+      <tr><td class="id">IT-02</td><td>Gửi dữ liệu sai từng trường; thân không phải JSON; thân 3 KB</td><td><code>400</code> có <code>fields</code> đúng trường; <code>415</code>; <code>413</code>. Không có dòng nào được tạo.</td></tr>
+      <tr><td class="id">IT-03</td><td><code>GET /api/players/{id}</code> với id có thật, UUID ngẫu nhiên, <code>"abc"</code></td><td><code>200</code> chỉ có <code>id</code>, <code>fullName</code>; <code>404</code>; <code>404</code>.</td></tr>
+      <tr><td class="id">IT-04</td><td>Mọi API admin khi không có cookie, cookie sai, phiên hết hạn</td><td><code>401</code>.</td></tr>
+      <tr><td class="id">IT-05</td><td>Đăng nhập đúng; kiểm tra bảng <code>admin_sessions</code>; đăng xuất</td><td><code>204</code>; bảng lưu SHA-256 (không lưu mã gốc), <code>expires_at</code> = +8 giờ; sau đăng xuất dòng bị xoá.</td></tr>
+      <tr><td class="id">IT-06</td><td>Nạp 45 dòng mẫu; gọi danh sách với <code>page</code> = 1, 3, 0, 99, <code>"x"</code> và <code>q</code> = “nguyen”, “0912 345”, “%”</td><td>Phân trang và giới hạn trang như trang 04 · mục 14.3; tìm không dấu, tìm theo số, <code>%</code> tìm nghĩa đen.</td></tr>
+      <tr><td class="id">IT-07</td><td><code>DELETE /admin/api/players/{id}</code> hai lần</td><td><code>204</code> rồi <code>404</code>; <code>GET /api/players/{id}</code> sau đó trả <code>404</code>.</td></tr>
+      <tr><td class="id">IT-08</td><td><code>GET /admin/api/players.csv</code> có và không có <code>q</code></td><td><code>Content-Type: text/csv; charset=utf-8</code>, <code>Content-Disposition: attachment; filename="dap-toi-nguoi-choi-…csv"</code>; nội dung đúng UT-17 và đúng tập kết quả tìm kiếm.</td></tr>
+      <tr><td class="id">IT-09</td><td>Các yêu cầu <code>POST</code>/<code>DELETE</code> với <code>Origin</code> lạ hoặc thiếu</td><td><code>403</code>.</td></tr>
+      <tr><td class="id">IT-10</td><td>Gửi chuỗi tấn công SQL vào mọi trường và vào <code>q</code> (<code>'; DROP TABLE players; --</code>, <code>' OR '1'='1</code>)</td><td>Không lỗi <code>500</code>; dữ liệu bị từ chối do kiểm tra hoặc được tìm như chữ thường; bảng còn nguyên.</td></tr>
+      <tr><td class="id">IT-11</td><td>Dừng database rồi gọi <code>POST /api/players</code> và <code>GET /api/players/{id}</code>; bật lại database</td><td><code>503</code>, server không tắt; sau khi database chạy lại các API trả kết quả bình thường mà không cần khởi động lại <code>app</code>.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2 id="dk-dod"><span class="num">10</span>Tiêu chí hoàn thành bổ sung <span class="tag new">Mới</span></h2>
+  <p>DoD 1–18 ở mục 5 lấy từ <code>YEU-CAU.md</code> và giữ nguyên. Tính năng đăng ký &amp; admin chưa có trong <code>YEU-CAU.md</code> nên dùng bộ tiêu chí riêng DK-1 → DK-10.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Mã</th><th>Nội dung</th><th>Ca kiểm thử</th></tr></thead>
+    <tbody>
+      <tr><td>DK-1</td><td>Phải đăng ký hợp lệ (3 trường + đồng ý) mới chơi được; lỗi hiện đúng ô, đúng câu</td><td>TC-39 → TC-42, UT-10 → UT-13</td></tr>
+      <tr><td>DK-2</td><td>Dữ liệu được chuẩn hoá và lưu vào PostgreSQL; không trùng email; không gửi trùng; lỗi database được báo rõ</td><td>TC-40, TC-44 → TC-46, UT-16, IT-01, IT-02, IT-11</td></tr>
+      <tr><td>DK-3</td><td>Trình duyệt nhớ người chơi; đổi người chơi được; người bị xoá phải đăng ký lại</td><td>TC-49 → TC-51, UT-14, UT-15, IT-03</td></tr>
+      <tr><td>DK-4</td><td>Trang và API admin chỉ dùng được sau khi đăng nhập; khoá khi sai nhiều lần; đăng xuất huỷ phiên; thiếu cấu hình thì không khởi động</td><td>TC-56 → TC-59, TC-61, UT-19, UT-21, IT-04, IT-05</td></tr>
+      <tr><td>DK-5</td><td>Danh sách phân trang đúng; tìm theo họ tên (không dấu), email, số điện thoại</td><td>TC-63, TC-64, UT-18, IT-06</td></tr>
+      <tr><td>DK-6</td><td>Xoá có xác nhận và xoá hẳn khỏi database</td><td>TC-68, IT-07</td></tr>
+      <tr><td>DK-7</td><td>CSV đúng tập kết quả tìm kiếm, mở bằng Excel hiện đúng tiếng Việt và số điện thoại</td><td>TC-72, TC-73, UT-17, IT-08</td></tr>
+      <tr><td>DK-8</td><td>Chạy bằng Docker Compose 2 dịch vụ; dữ liệu còn sau khi khởi động lại</td><td>TC-76, TC-77</td></tr>
+      <tr><td>DK-9</td><td>Không lộ bí mật trong repo / log; chặn XSS, SQL injection, gửi giả mạo</td><td>TC-67, TC-78, TC-79, IT-09, IT-10</td></tr>
+      <tr><td>DK-10</td><td>Game cũ không bị ảnh hưởng (DoD 1–18 vẫn đạt khi chạy qua server)</td><td>TC-80</td></tr>
+    </tbody>
+  </table></div>
+  <p><strong>Hoàn thành tính năng</strong> khi: 100% ca <span class="tag must">P1</span> ở mục 8, toàn bộ UT-10 → UT-21 và IT-01 → IT-11 đạt (tương đương đủ DK-1 → DK-10); ca <span class="tag should">P2</span> chưa đạt đã có kế hoạch sửa. Mức độ lỗi bổ sung: lộ dữ liệu cá nhân hoặc vào được admin không cần đăng nhập là <em>Nghiêm trọng</em>; mất hoặc trùng dữ liệu người chơi là <em>Nghiêm trọng</em>.</p>
 
   <div class="pager">
     <a href="04-quy-tac-du-lieu.html"><small>← Trước</small>04 Quy tắc &amp; dữ liệu</a>

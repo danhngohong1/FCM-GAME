@@ -5,6 +5,33 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>03 Màn hình — Tài liệu game Đập Tôi</title>
 <link rel="stylesheet" href="docs.css">
+<style>
+  /* Bổ sung cho phác thảo màn hình Đăng ký & trang admin (mục 8–12) */
+  .mock .body.form { justify-content: flex-start; align-items: stretch; text-align: left; gap: var(--space-sm); }
+  .mock .body.form .title, .mock .body.form > img.toi { align-self: center; }
+  .mock .body.form > img.toi { height: 64px; }
+  .mock .field { display: flex; flex-direction: column; gap: var(--space-xxs); font-size: var(--size-caption); color: var(--color-ink); font-weight: var(--weight-semibold); }
+  .mock .input { min-height: 32px; padding: var(--space-xs) var(--space-md); border: var(--border-hairline); border-radius: var(--radius-md); background: var(--color-canvas); color: var(--color-body); font-weight: var(--weight-regular); }
+  .mock .input.bad { border-color: var(--color-error); }
+  .mock .err { color: var(--color-error); font-weight: var(--weight-regular); }
+  .mock .check { display: flex; gap: var(--space-xs); align-items: flex-start; font-size: var(--size-caption); color: var(--color-body); }
+  .mock .check::before { content: "✓"; flex: none; display: grid; place-items: center; width: 16px; height: 16px; border-radius: var(--radius-sm); background: var(--color-ink); color: var(--color-on-dark); font-size: 11px; }
+  .mock .link { font-size: var(--size-caption); color: var(--color-ink-soft); text-decoration: underline; }
+  .mock .body.form .btn { align-self: stretch; }
+  .mock.desk { aspect-ratio: 16 / 10; }
+  .screens.wide { grid-template-columns: minmax(0, 1fr); }
+  .screens.wide figure { max-width: 720px; min-width: 0; }
+  .mock .body.admin { justify-content: flex-start; align-items: stretch; text-align: left; gap: var(--space-sm); font-size: var(--size-caption); min-width: 0; overflow-x: auto; }
+  .mock .toolbar { flex-wrap: wrap; }
+  .mock .toolbar { display: flex; gap: var(--space-sm); align-items: center; }
+  .mock .toolbar .input { flex: 1; }
+  .mock .mini { width: 100%; border-collapse: collapse; font-size: 11px; }
+  .mock .mini th, .mock .mini td { padding: var(--space-xxs) var(--space-xs); border-bottom: var(--border-hairline); text-align: left; white-space: nowrap; }
+  .mock .mini th { color: var(--color-ink); }
+  .mock .mini .del { color: var(--color-error); font-weight: var(--weight-bold); }
+  .mock .btn.sm { min-height: 28px; padding: var(--space-xxs) var(--space-md); font-size: var(--size-caption); }
+  .mock .pager-mini { display: flex; justify-content: space-between; align-items: center; color: var(--color-mute); }
+</style>
 </head>
 <body>
 <nav class="topnav" aria-label="Tài liệu">
@@ -39,6 +66,11 @@
       <li><a href="#chi-tiet">Thành phần từng màn hình</a></li>
       <li><a href="#co-gian">Co giãn &amp; hướng màn hình</a></li>
       <li><a href="#chu">Chữ hiển thị trong game</a></li>
+      <li><a href="#dk-danh-sach">Màn hình bổ sung: Đăng ký &amp; admin</a> <span class="tag new">Mới</span></li>
+      <li><a href="#dk-luong">Luồng chuyển màn bổ sung</a> <span class="tag new">Mới</span></li>
+      <li><a href="#dk-phac-thao">Phác thảo Đăng ký &amp; admin</a> <span class="tag new">Mới</span></li>
+      <li><a href="#dk-thanh-phan">Thành phần màn hình bổ sung</a> <span class="tag new">Mới</span></li>
+      <li><a href="#dk-chu">Chữ hiển thị bổ sung</a> <span class="tag new">Mới</span></li>
     </ol>
   </nav>
 
@@ -215,6 +247,242 @@
       <tr><td>S2 khi trúng</td><td>+1</td></tr>
       <tr><td>S3</td><td>Hết giờ! · Điểm của bạn · {N} · ★ Kỷ lục mới! · Kỷ lục: {M} · Chơi lại</td></tr>
       <tr><td>Ô có nhân vật (aria-label)</td><td>Có nhân vật</td></tr>
+    </tbody>
+  </table></div>
+
+  <!-- ================= Bổ sung: Đăng ký người chơi & trang quản trị ================= -->
+
+  <h2 id="dk-danh-sach"><span class="num">8</span>Màn hình bổ sung: Đăng ký &amp; admin <span class="tag new">Mới</span></h2>
+  <p>Thêm 1 màn hình cho người chơi và 3 màn hình cho quản trị viên. Chức năng ở <a href="02-chuc-nang.html#dang-ky-admin">trang 02 · mục 5</a>; các giả định GĐ-1 → GĐ-6 ghi ở đó.</p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th class="id">Mã</th><th>Tên</th><th>Loại</th><th>Đường dẫn</th><th>Chức năng liên quan</th></tr></thead>
+      <tbody>
+        <tr><td class="id">S0</td><td>Đăng ký người chơi</td><td>Màn hình, hiện trước S1</td><td><code>/app/</code></td><td>F-12, F-13, F-14</td></tr>
+        <tr><td class="id">S1</td><td>Bắt đầu (bổ sung lời chào &amp; “Đổi người chơi”)</td><td>Màn hình</td><td><code>/app/</code></td><td>F-01, F-09, F-13</td></tr>
+        <tr><td class="id">A1</td><td>Đăng nhập admin</td><td>Trang riêng</td><td><code>/admin/login</code></td><td>F-15</td></tr>
+        <tr><td class="id">A2</td><td>Danh sách người chơi</td><td>Trang riêng</td><td><code>/admin/</code></td><td>F-15, F-16, F-17, F-18</td></tr>
+        <tr><td class="id">A3</td><td>Xác nhận xoá</td><td>Hộp nổi trên A2</td><td>—</td><td>F-17</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2 id="dk-luong"><span class="num">9</span>Luồng chuyển màn bổ sung <span class="tag new">Mới</span></h2>
+  <h3>9.1 Người chơi</h3>
+  <div class="flow">
+    <span class="node">Mở game</span><span class="arrow">→ chưa đăng ký →</span><span class="node">S0 Đăng ký</span><span class="arrow">→</span><span class="node">S1 Bắt đầu</span><span class="arrow">→</span><span class="node">S2 → S3 như cũ</span>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Từ</th><th>Sự kiện</th><th>Đến</th></tr></thead>
+      <tbody>
+        <tr><td>Mở game</td><td>Trình duyệt chưa nhớ người chơi</td><td>S0</td></tr>
+        <tr><td>Mở game</td><td>Đã nhớ người chơi, server xác nhận còn tồn tại</td><td>S1 với “Xin chào, {Họ tên}!”</td></tr>
+        <tr><td>Mở game</td><td>Đã nhớ người chơi nhưng server báo đã bị xoá</td><td>S0 (quên người chơi cũ)</td></tr>
+        <tr><td>Mở game</td><td>Đã nhớ người chơi, không kết nối được server</td><td>S1 (vẫn cho chơi)</td></tr>
+        <tr><td>S0</td><td>Bấm “Đăng ký &amp; chơi”, dữ liệu hợp lệ, server lưu thành công</td><td>S1, focus nút “Bắt đầu”</td></tr>
+        <tr><td>S0</td><td>Dữ liệu sai hoặc server báo lỗi / mất kết nối</td><td>Ở lại S0, hiện lỗi, giữ dữ liệu đã nhập</td></tr>
+        <tr><td>S1</td><td>Bấm “Đổi người chơi” <strong>(GĐ-4)</strong></td><td>S0 với form trống</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>Trong lúc chờ server xác nhận người chơi khi mở game, hiện màn hình trống nền <code>--color-surface-soft</code> với dòng “Đang tải…” (tối đa 3 giây, quá thì coi như mất kết nối). S2, S3 và “Chơi lại” không đổi: chơi lại không quay về S0.</p>
+
+  <h3>9.2 Quản trị viên</h3>
+  <div class="flow">
+    <span class="node">A1 Đăng nhập</span><span class="arrow">→</span><span class="node">A2 Danh sách</span><span class="arrow">→ Xoá →</span><span class="node">A3 Xác nhận</span><span class="arrow">→</span><span class="node">A2</span>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Từ</th><th>Sự kiện</th><th>Đến</th></tr></thead>
+      <tbody>
+        <tr><td>Bất kỳ</td><td>Mở <code>/admin/</code> khi chưa đăng nhập hoặc phiên đã hết hạn</td><td>A1</td></tr>
+        <tr><td>A1</td><td>Đăng nhập đúng</td><td>A2 (trang 1, không lọc)</td></tr>
+        <tr><td>A1</td><td>Sai thông tin / đang bị khoá tạm</td><td>Ở lại A1, hiện lỗi</td></tr>
+        <tr><td>A2</td><td>Tìm kiếm, chuyển trang</td><td>A2 với kết quả mới</td></tr>
+        <tr><td>A2</td><td>Bấm “Xuất CSV”</td><td>A2, trình duyệt tải file</td></tr>
+        <tr><td>A2</td><td>Bấm “Xoá” ở một dòng</td><td>A3</td></tr>
+        <tr><td>A3</td><td>Bấm “Xoá” / “Huỷ” hoặc phím Esc</td><td>A2 (đã xoá / không đổi)</td></tr>
+        <tr><td>A2</td><td>Bấm “Đăng xuất”</td><td>A1</td></tr>
+        <tr><td>A2</td><td>Thao tác khi phiên đã hết hạn</td><td>A1 với thông báo “Phiên đăng nhập đã hết hạn.”</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2 id="dk-phac-thao"><span class="num">10</span>Phác thảo Đăng ký &amp; admin <span class="tag new">Mới</span></h2>
+  <h3>10.1 Người chơi (điện thoại, màn hình dọc)</h3>
+  <div class="screens">
+    <figure>
+      <div class="mock">
+        <div class="bar"><span></span><span></span></div>
+        <div class="body form">
+          <img class="toi" src="../assets/toi.png" alt="">
+          <div class="title">Đập Tôi</div>
+          <div class="small" style="text-align:center">Nhập thông tin để bắt đầu chơi.</div>
+          <label class="field">Họ và tên<span class="input">Nguyễn Văn An</span></label>
+          <label class="field">Email<span class="input">an.nguyen@gmail.com</span></label>
+          <label class="field">Số điện thoại<span class="input bad">0912 34</span><span class="err">Số điện thoại phải có 10 chữ số.</span></label>
+          <span class="check">Tôi đồng ý cho lưu họ tên, email, số điện thoại để tham gia game.</span>
+          <span class="btn">Đăng ký &amp; chơi</span>
+        </div>
+      </div>
+      <figcaption class="mock-caption"><strong>S0 · Đăng ký</strong>: 3 ô bắt buộc, ô đồng ý, một nút đỏ; lỗi hiện ngay dưới ô.</figcaption>
+    </figure>
+
+    <figure>
+      <div class="mock">
+        <div class="bar"><span></span><span></span></div>
+        <div class="body">
+          <img class="toi" src="../assets/toi.png" alt="">
+          <div class="small"><strong>Xin chào, Nguyễn Văn An!</strong></div>
+          <div class="title">Đập Tôi</div>
+          <div class="small">Bấm trúng tôi để ghi điểm.<br>Bạn có 30 giây!</div>
+          <span class="btn">Bắt đầu</span>
+          <div class="small"><strong>Kỷ lục: 27</strong></div>
+          <span class="link">Không phải bạn? Đổi người chơi</span>
+        </div>
+      </div>
+      <figcaption class="mock-caption"><strong>S1 · Bắt đầu (bổ sung)</strong>: lời chào ở trên, liên kết đổi người chơi ở dưới cùng.</figcaption>
+    </figure>
+  </div>
+
+  <h3>10.2 Quản trị viên (máy tính)</h3>
+  <div class="screens wide">
+    <figure>
+      <div class="mock desk">
+        <div class="bar"><span>Đập Tôi · Quản trị</span><span></span></div>
+        <div class="body">
+          <div class="title">Đăng nhập</div>
+          <label class="field" style="width:60%;text-align:left">Tên đăng nhập<span class="input">admin</span></label>
+          <label class="field" style="width:60%;text-align:left">Mật khẩu<span class="input">••••••••••••</span></label>
+          <span class="err small">Tên đăng nhập hoặc mật khẩu không đúng.</span>
+          <span class="btn">Đăng nhập</span>
+        </div>
+      </div>
+      <figcaption class="mock-caption"><strong>A1 · Đăng nhập admin</strong>: thẻ trắng giữa trang, rộng tối đa 400 px.</figcaption>
+    </figure>
+
+    <figure>
+      <div class="mock desk">
+        <div class="bar"><span>Đập Tôi · Quản trị</span><span>Đăng xuất</span></div>
+        <div class="body admin">
+          <div class="toolbar">
+            <span class="input">nguyen</span><span class="btn sm secondary">Tìm</span><span class="btn sm">Xuất CSV</span>
+          </div>
+          <div class="small">128 người chơi khớp “nguyen”</div>
+          <table class="mini">
+            <thead><tr><th>Họ và tên</th><th>Email</th><th>Số điện thoại</th><th>Đăng ký lúc</th><th></th></tr></thead>
+            <tbody>
+              <tr><td>Nguyễn Văn An</td><td>an.nguyen@gmail.com</td><td>0912345678</td><td>18/11/2026 21:04</td><td class="del">Xoá</td></tr>
+              <tr><td>Nguyễn Thị Bình</td><td>binh@example.com</td><td>0387654321</td><td>18/11/2026 20:51</td><td class="del">Xoá</td></tr>
+              <tr><td>Trần Nguyên Khang</td><td>khang.tn@example.com</td><td>0701234567</td><td>17/11/2026 09:12</td><td class="del">Xoá</td></tr>
+            </tbody>
+          </table>
+          <div class="pager-mini"><span class="btn sm secondary">← Trang trước</span><span>Trang 1 / 7</span><span class="btn sm secondary">Trang sau →</span></div>
+        </div>
+      </div>
+      <figcaption class="mock-caption"><strong>A2 · Danh sách người chơi</strong>: ô tìm kiếm, nút “Xuất CSV” là nút đỏ duy nhất; bảng 20 dòng mỗi trang.</figcaption>
+    </figure>
+
+    <figure>
+      <div class="mock desk">
+        <div class="bar"><span>Đập Tôi · Quản trị</span><span>Đăng xuất</span></div>
+        <div class="body admin" style="opacity:.4"></div>
+        <div class="overlay"><div class="modal" style="max-width:360px">
+          <div class="title" style="font-size:var(--size-heading-lg)">Xoá người chơi?</div>
+          <div class="small">Nguyễn Văn An · an.nguyen@gmail.com<br>Dữ liệu sẽ bị xoá vĩnh viễn, không khôi phục được.</div>
+          <div class="toolbar"><span class="btn sm secondary">Huỷ</span><span class="btn sm">Xoá</span></div>
+        </div></div>
+      </div>
+      <figcaption class="mock-caption"><strong>A3 · Xác nhận xoá</strong>: hộp nổi trên A2; nút “Xoá” đỏ, focus mặc định ở “Huỷ”.</figcaption>
+    </figure>
+  </div>
+
+  <h2 id="dk-thanh-phan"><span class="num">11</span>Thành phần màn hình bổ sung <span class="tag new">Mới</span></h2>
+
+  <h3>S0 · Đăng ký</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Thành phần</th><th>Mô tả</th><th>Token</th></tr></thead>
+    <tbody>
+      <tr><td>Nền, ảnh, tiêu đề</td><td>Như S1 nhưng ảnh nhân vật nhỏ hơn (cao khoảng 64 px) để form vừa màn hình 320×568 không cần cuộn.</td><td><code>--color-surface-soft</code>, <code>--size-display-lg</code></td></tr>
+      <tr><td>Dòng giới thiệu</td><td>“Nhập thông tin để bắt đầu chơi.”</td><td><code>--size-body-md</code>, <code>--color-body</code></td></tr>
+      <tr><td>Ô nhập (3 ô)</td><td>Nhãn ở trên ô, luôn hiện (không dùng placeholder thay nhãn). Ô cao 44 px, bo 16 px, nền trắng, kẻ mảnh. Kiểu bàn phím: họ tên <code>type="text"</code> <code>autocomplete="name"</code>; email <code>type="email"</code> <code>autocomplete="email"</code>; số điện thoại <code>type="tel"</code> <code>inputmode="tel"</code> <code>autocomplete="tel"</code>. Cỡ chữ 16 px để iPhone không tự phóng to.</td><td><code>--input-height</code>, <code>--radius-md</code>, <code>--border-hairline</code>, <code>--size-body-md</code></td></tr>
+      <tr><td>Lỗi của ô</td><td>Chữ đỏ ngay dưới ô, viền ô đổi màu lỗi; ô có <code>aria-invalid="true"</code> và <code>aria-describedby</code> trỏ tới dòng lỗi.</td><td><code>--color-error</code>, <code>--size-caption</code></td></tr>
+      <tr><td>Ô đồng ý</td><td>Checkbox thật, vùng bấm ≥ 44 px, chữ “Tôi đồng ý cho lưu họ tên, email, số điện thoại để tham gia game.” <strong>(GĐ-2)</strong></td><td><code>--size-body-sm</code></td></tr>
+      <tr><td>Nút “Đăng ký &amp; chơi”</td><td>Nút đỏ duy nhất, rộng hết form. Khi đang gửi: chữ “Đang gửi…”, bị khoá.</td><td><code>--color-primary</code>, <code>--radius-md</code></td></tr>
+      <tr><td>Thông báo chung</td><td>Hộp ngay trên nút khi mất kết nối / lỗi server, có <code>role="alert"</code>.</td><td><code>--color-secondary-bg</code></td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>S1 · Bắt đầu (phần bổ sung)</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Thành phần</th><th>Mô tả</th><th>Token</th></tr></thead>
+    <tbody>
+      <tr><td>Lời chào</td><td>“Xin chào, {Họ tên}!” giữa ảnh và tiêu đề. Tên dài bị cắt bằng “…” trên một dòng.</td><td><code>--size-body-sm</code>, <code>--weight-bold</code>, <code>--color-ink</code></td></tr>
+      <tr><td>Đổi người chơi</td><td>Liên kết chữ dưới dòng kỷ lục: “Không phải bạn? Đổi người chơi”. Là <code>&lt;button&gt;</code> kiểu liên kết, vùng chạm ≥ 44 px; không phải nút đỏ.</td><td><code>--size-caption</code>, <code>--color-ink-soft</code></td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>A1 · Đăng nhập admin</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Thành phần</th><th>Mô tả</th></tr></thead>
+    <tbody>
+      <tr><td>Thanh trên</td><td>“Đập Tôi · Quản trị” bên trái; nền trắng, kẻ mảnh dưới (như thanh trạng thái S2).</td></tr>
+      <tr><td>Thẻ đăng nhập</td><td>Thẻ trắng bo <code>--radius-lg</code>, rộng tối đa 400 px, căn giữa; tiêu đề “Đăng nhập”.</td></tr>
+      <tr><td>Ô nhập</td><td>“Tên đăng nhập” (<code>autocomplete="username"</code>) và “Mật khẩu” (<code>type="password"</code>, <code>autocomplete="current-password"</code>). Focus tự động ô đầu tiên.</td></tr>
+      <tr><td>Lỗi</td><td>Một dòng chung phía trên nút, <code>role="alert"</code>. Sai mật khẩu thì xoá ô mật khẩu, giữ tên đăng nhập.</td></tr>
+      <tr><td>Nút</td><td>“Đăng nhập” màu đỏ; Enter trong ô mật khẩu cũng gửi.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>A2 · Danh sách người chơi</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Thành phần</th><th>Mô tả</th></tr></thead>
+    <tbody>
+      <tr><td>Thanh trên</td><td>“Đập Tôi · Quản trị” bên trái, nút phụ “Đăng xuất” bên phải.</td></tr>
+      <tr><td>Thanh công cụ</td><td>Ô tìm kiếm (nhãn ẩn “Tìm theo họ tên, email hoặc số điện thoại”, <code>type="search"</code>), nút phụ “Tìm”, nút đỏ “Xuất CSV” (nút đỏ duy nhất của trang).</td></tr>
+      <tr><td>Dòng tổng</td><td>“{N} người chơi” hoặc “{N} người chơi khớp “{từ khoá}””.</td></tr>
+      <tr><td>Bảng</td><td>Cột: Họ và tên, Email, Số điện thoại, Đăng ký lúc (<code>dd/MM/yyyy HH:mm</code>, giờ Việt Nam), cột nút “Xoá” (chữ màu lỗi, không phải nút đỏ đặc). Bảng dùng <code>&lt;table&gt;</code> có <code>&lt;th scope="col"&gt;</code>. Màn hình hẹp: bảng cuộn ngang trong khung riêng, trang không cuộn ngang.</td></tr>
+      <tr><td>Phân trang</td><td>Nút phụ “← Trang trước”, “Trang sau →” (khoá ở trang đầu / cuối) và “Trang X / Y”.</td></tr>
+      <tr><td>Trạng thái rỗng</td><td>“Chưa có người chơi nào.” (không lọc) hoặc “Không tìm thấy người chơi nào.” (có lọc).</td></tr>
+      <tr><td>Thông báo</td><td>Dải thông báo ngắn ở đầu bảng sau khi xoá: “Đã xoá {Họ tên}.”, <code>role="status"</code>, tự ẩn sau 4 giây.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>A3 · Xác nhận xoá</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Thành phần</th><th>Mô tả</th></tr></thead>
+    <tbody>
+      <tr><td>Lớp phủ &amp; hộp</td><td>Như S3: <code>--scrim</code>, thẻ trắng bo <code>--radius-lg</code>, bóng <code>--shadow-modal</code>; <code>role="alertdialog"</code>.</td></tr>
+      <tr><td>Nội dung</td><td>Tiêu đề “Xoá người chơi?”, họ tên và email, câu “Dữ liệu sẽ bị xoá vĩnh viễn, không khôi phục được.”</td></tr>
+      <tr><td>Nút</td><td>“Huỷ” (nút phụ, nhận focus mặc định) và “Xoá” (nút đỏ). Esc hoặc bấm ra ngoài hộp = Huỷ. Đang xoá thì khoá cả hai nút.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Co giãn</h3>
+  <ul>
+    <li><strong>S0</strong> theo cùng quy tắc co giãn với S1 (mục 6); form rộng tối đa 400 px; ở 320×568 cả form và nút nằm gọn trong màn hình khi bàn phím chưa bật.</li>
+    <li><strong>A1, A2</strong> thiết kế cho máy tính (từ 1024 px) nhưng vẫn dùng được từ 320 px: thanh công cụ xuống dòng, bảng cuộn ngang trong khung.</li>
+  </ul>
+
+  <h2 id="dk-chu"><span class="num">12</span>Chữ hiển thị bổ sung <span class="tag new">Mới</span></h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Vị trí</th><th>Nội dung</th></tr></thead>
+    <tbody>
+      <tr><td>S0 giới thiệu</td><td>Nhập thông tin để bắt đầu chơi.</td></tr>
+      <tr><td>S0 nhãn</td><td>Họ và tên · Email · Số điện thoại</td></tr>
+      <tr><td>S0 ô đồng ý</td><td>Tôi đồng ý cho lưu họ tên, email, số điện thoại để tham gia game.</td></tr>
+      <tr><td>S0 nút</td><td>Đăng ký &amp; chơi · Đang gửi…</td></tr>
+      <tr><td>S0 lỗi họ tên</td><td>Vui lòng nhập họ và tên. · Họ và tên cần từ 2 đến 100 ký tự. · Họ và tên chỉ gồm chữ cái, khoảng trắng và các dấu ' - .</td></tr>
+      <tr><td>S0 lỗi email</td><td>Vui lòng nhập email. · Email không đúng định dạng (ví dụ: ten@gmail.com).</td></tr>
+      <tr><td>S0 lỗi số điện thoại</td><td>Vui lòng nhập số điện thoại. · Số điện thoại phải có 10 chữ số. · Số điện thoại di động Việt Nam phải bắt đầu bằng 03, 05, 07, 08 hoặc 09.</td></tr>
+      <tr><td>S0 lỗi đồng ý</td><td>Bạn cần đồng ý để tiếp tục.</td></tr>
+      <tr><td>S0 lỗi chung</td><td>Không kết nối được máy chủ. Vui lòng thử lại. · Bạn gửi quá nhiều lần. Vui lòng thử lại sau ít phút.</td></tr>
+      <tr><td>Khi mở game</td><td>Đang tải…</td></tr>
+      <tr><td>S1 bổ sung</td><td>Xin chào, {Họ tên}! · Không phải bạn? Đổi người chơi</td></tr>
+      <tr><td>A1</td><td>Đập Tôi · Quản trị · Đăng nhập · Tên đăng nhập · Mật khẩu · Tên đăng nhập hoặc mật khẩu không đúng. · Đăng nhập sai quá nhiều lần. Thử lại sau {M} phút. · Phiên đăng nhập đã hết hạn.</td></tr>
+      <tr><td>A2</td><td>Tìm · Xuất CSV · Đăng xuất · {N} người chơi · {N} người chơi khớp “{từ khoá}” · Họ và tên · Email · Số điện thoại · Đăng ký lúc · Xoá · ← Trang trước · Trang sau → · Trang {X} / {Y} · Chưa có người chơi nào. · Không tìm thấy người chơi nào. · Đã xoá {Họ tên}. · Người chơi không còn tồn tại.</td></tr>
+      <tr><td>A3</td><td>Xoá người chơi? · Dữ liệu sẽ bị xoá vĩnh viễn, không khôi phục được. · Huỷ · Xoá</td></tr>
     </tbody>
   </table></div>
 
