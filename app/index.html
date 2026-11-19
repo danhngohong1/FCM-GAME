@@ -10,13 +10,58 @@
 <body>
   <main id="app" class="app">
 
+    <!-- Đang kiểm tra người chơi đã nhớ (04 · mục 11) -->
+    <section id="screen-boot" class="screen screen--boot" aria-live="polite">
+      <p class="boot__text">Đang tải…</p>
+    </section>
+
+    <!-- S0 · Đăng ký người chơi -->
+    <section id="screen-register" class="screen screen--register" aria-labelledby="register-title" hidden>
+      <form id="register-form" class="register" novalidate>
+        <img class="register__hero" src="../assets/toi.png" alt="" draggable="false">
+        <h1 id="register-title" class="start__title">Đập Tôi</h1>
+        <p class="register__intro">Nhập thông tin để bắt đầu chơi.</p>
+
+        <div class="field">
+          <label class="field__label" for="reg-name">Họ và tên</label>
+          <input class="field__input" id="reg-name" name="fullName" type="text" autocomplete="name" maxlength="200" aria-describedby="reg-name-error" required>
+          <p class="field__error" id="reg-name-error" hidden></p>
+        </div>
+
+        <div class="field">
+          <label class="field__label" for="reg-email">Email</label>
+          <input class="field__input" id="reg-email" name="email" type="email" autocomplete="email" inputmode="email" maxlength="300" aria-describedby="reg-email-error" required>
+          <p class="field__error" id="reg-email-error" hidden></p>
+        </div>
+
+        <div class="field">
+          <label class="field__label" for="reg-phone">Số điện thoại</label>
+          <input class="field__input" id="reg-phone" name="phone" type="tel" autocomplete="tel" inputmode="tel" maxlength="30" aria-describedby="reg-phone-error" required>
+          <p class="field__error" id="reg-phone-error" hidden></p>
+        </div>
+
+        <div class="field">
+          <label class="check" for="reg-consent">
+            <input class="check__box" id="reg-consent" name="consent" type="checkbox" aria-describedby="reg-consent-error">
+            <span>Tôi đồng ý cho lưu họ tên, email, số điện thoại để tham gia game.</span>
+          </label>
+          <p class="field__error" id="reg-consent-error" hidden></p>
+        </div>
+
+        <p id="register-error" class="notice" role="alert" hidden></p>
+        <button id="btn-register" class="btn btn--primary btn--block" type="submit">Đăng ký &amp; chơi</button>
+      </form>
+    </section>
+
     <!-- S1 · Bắt đầu -->
-    <section id="screen-start" class="screen screen--start" aria-labelledby="game-title">
+    <section id="screen-start" class="screen screen--start" aria-labelledby="game-title" hidden>
       <img class="start__hero" src="../assets/toi.png" alt="Nhân vật “tôi” đội vương miện" draggable="false">
+      <p id="start-greeting" class="start__greeting" hidden>Xin chào, <span id="start-greeting-name"></span>!</p>
       <h1 id="game-title" class="start__title">Đập Tôi</h1>
       <p class="start__rules">Bấm trúng tôi để ghi điểm. Bạn có <span data-round-seconds></span> giây!</p>
       <button id="btn-start" class="btn btn--primary" type="button">Bắt đầu</button>
       <p id="start-best" class="best" hidden>Kỷ lục: <span id="start-best-value">0</span></p>
+      <button id="btn-change-player" class="link-btn" type="button" hidden>Không phải bạn? Đổi người chơi</button>
     </section>
 
     <!-- S2 · Chơi (S3 là hộp nổi bên trong) -->
@@ -48,6 +93,8 @@
     <p id="announcer" class="sr-only" aria-live="polite"></p>
   </main>
 
+  <script src="validate.js"></script>
   <script src="game.js"></script>
+  <script src="player.js"></script>
 </body>
 </html>

@@ -5,9 +5,14 @@ ENV NODE_ENV=production \
 
 WORKDIR /srv
 
-# Server không có thư viện phụ thuộc, chỉ cần package.json và server.js
-COPY package.json server.js ./
+# Thư viện phía server: chỉ `pg` (NF-11)
+COPY package.json package-lock.json ./
+RUN npm ci --omit=dev --no-audit --no-fund && npm cache clean --force
+
+COPY server.js ./
+COPY server ./server
 COPY app ./app
+COPY admin ./admin
 COPY design ./design
 COPY assets ./assets
 

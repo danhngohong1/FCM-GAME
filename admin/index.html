@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Người chơi · Đập Tôi · Quản trị</title>
+  <link rel="stylesheet" href="../design/tokens.css">
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body data-page="list">
+  <header class="topbar">
+    <span class="topbar__brand">Đập Tôi · Quản trị</span>
+    <button id="btn-logout" class="btn btn--secondary" type="button">Đăng xuất</button>
+  </header>
+
+  <!-- A2 · Danh sách người chơi -->
+  <main class="page">
+    <h1 class="sr-only">Danh sách người chơi</h1>
+
+    <form id="search-form" class="toolbar" role="search">
+      <label class="sr-only" for="search-input">Tìm theo họ tên, email hoặc số điện thoại</label>
+      <input class="field__input toolbar__search" id="search-input" name="q" type="search" maxlength="100" placeholder="Họ tên, email hoặc số điện thoại" autocomplete="off">
+      <button class="btn btn--secondary" type="submit">Tìm</button>
+      <a id="btn-export" class="btn btn--primary" href="api/players.csv" download>Xuất CSV</a>
+    </form>
+
+    <p id="toast" class="toast" role="status" hidden></p>
+    <p id="summary" class="summary" aria-live="polite"></p>
+
+    <div class="table-scroll" tabindex="0" aria-label="Bảng người chơi">
+      <table class="players">
+        <thead>
+          <tr>
+            <th scope="col">Họ và tên</th>
+            <th scope="col">Email</th>
+            <th scope="col">Số điện thoại</th>
+            <th scope="col">Đăng ký lúc</th>
+            <th scope="col"><span class="sr-only">Thao tác</span></th>
+          </tr>
+        </thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+    <p id="empty" class="empty" hidden></p>
+
+    <nav class="pager" aria-label="Phân trang">
+      <button id="btn-prev" class="btn btn--secondary" type="button">← Trang trước</button>
+      <span id="page-info" class="pager__info"></span>
+      <button id="btn-next" class="btn btn--secondary" type="button">Trang sau →</button>
+    </nav>
+  </main>
+
+  <!-- A3 · Xác nhận xoá -->
+  <dialog id="confirm" class="dialog" role="alertdialog" aria-labelledby="confirm-title" aria-describedby="confirm-desc">
+    <h2 id="confirm-title" class="dialog__title">Xoá người chơi?</h2>
+    <div id="confirm-desc">
+      <p class="dialog__who"><strong id="confirm-name"></strong> · <span id="confirm-email"></span></p>
+      <p class="dialog__note">Dữ liệu sẽ bị xoá vĩnh viễn, không khôi phục được.</p>
+    </div>
+    <div class="dialog__actions">
+      <button id="btn-cancel" class="btn btn--secondary" type="button">Huỷ</button>
+      <button id="btn-confirm" class="btn btn--primary" type="button">Xoá</button>
+    </div>
+  </dialog>
+
+  <script src="admin.js"></script>
+</body>
+</html>

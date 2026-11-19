@@ -19,14 +19,16 @@
   </style>
 </head>
 <body>
-  <h1>Kiểm thử logic tự động (UT-01 → UT-09)</h1>
+  <h1>Kiểm thử logic tự động (UT-01 → UT-16)</h1>
   <p id="summary">Đang chạy…</p>
   <table>
     <thead><tr><th>Mã</th><th>Nội dung</th><th>Kết quả</th><th>Chi tiết</th></tr></thead>
     <tbody id="rows"></tbody>
   </table>
 
+  <script src="validate.js"></script>
   <script src="game.js"></script>
+  <script src="player.js"></script>
   <script>
   (function () {
     "use strict";
@@ -314,7 +316,155 @@
       return { ok: allOk, detail: out.join("; ") };
     });
 
+    /* =========== Đăng ký người chơi (docs/05 · mục 9.1) =========== */
+    var V = window.DapToiValidate;
+    var KEY = C.PLAYER_KEY;
+    var UUID = "8bb28f40-8fe4-47f3-bca6-7c816fdd089c";
+
+    function eqAll(pairs) {
+      var bad = pairs.filter(function (p) { return p[1] !== p[2]; });
+      return { ok: bad.length === 0, detail: bad.length ? bad.map(function (p) { return p[0] + ": " + p[1] + " ≠ " + p[2]; }).join("; ") : pairs.length + " trường hợp đúng" };
+    }
+
+    test("UT-10", "Họ tên (trình duyệt)", function () {
+      return eqAll([
+        ["rỗng", V.validateName("").error, V.MSG.nameEmpty],
+        ["A", V.validateName("A").error, V.MSG.nameLength],
+        ["chuẩn hoá", V.validateName("  nguyễn   văn An ").value, "nguyễn văn An"],
+        ["An123", V.validateName("An123").error, V.MSG.nameFormat],
+        ["O'Brien-Smith", V.validateName("O'Brien-Smith").error, null],
+        ["101 ký tự", V.validateName(new Array(102).join("a")).error, V.MSG.nameLength],
+        ["NFD → NFC", V.validateName("Nguyễn").value, "Nguyễn"]
+      ]);
+    });
+    test("UT-11", "Email (trình duyệt)", function () {
+      return eqAll([
+        ["chuẩn hoá", V.validateEmail(" An@Gmail.COM ").value, "an@gmail.com"],
+        ["an@gmail", V.validateEmail("an@gmail").error, V.MSG.emailFormat],
+        ["có khoảng trắng", V.validateEmail("an gmail.com").error, V.MSG.emailFormat],
+        ["a@b.c", V.validateEmail("a@b.c").error, V.MSG.emailFormat]
+      ]);
+    });
+    test("UT-12", "Số điện thoại (trình duyệt)", function () {
+      return eqAll([
+        ["+84", V.validatePhone("+84 912 345 678").value, "0912345678"],
+        ["84…", V.validatePhone("84912345678").value, "0912345678"],
+        ["(091) 234-5678", V.validatePhone("(091) 234-5678").value, "0912345678"],
+        ["đầu 02", V.validatePhone("0212345678").error, V.MSG.phonePrefix],
+        ["9 số", V.validatePhone("091234567").error, V.MSG.phoneLength],
+        ["11 số", V.validatePhone("09123456789").error, V.MSG.phoneLength]
+      ]);
+    });
+    test("UT-13", "Đồng ý (trình duyệt)", function () {
+      return eqAll([
+        ["true", V.validateConsent(true).error, null],
+        ["false", V.validateConsent(false).error, V.MSG.consent],
+        ["\"true\"", V.validateConsent("true").error, V.MSG.consent],
+        ["1", V.validateConsent(1).error, V.MSG.consent]
+      ]);
+    });
+
+    function playerStorage(raw) {
+      var m = {};
+      if (raw !== null && raw !== undefined) m[KEY] = raw;
+      return {
+        getItem: function (k) { return Object.prototype.hasOwnProperty.call(m, k) ? m[k] : null; },
+        setItem: function (k, v) { m[k] = String(v); },
+        removeItem: function (k) { delete m[k]; },
+        has: function () { return Object.prototype.hasOwnProperty.call(m, KEY); }
+      };
+    }
+
+    test("UT-14", "Đọc dapToi.player", function () {
+      var cases = [null, "abc", "{}", JSON.stringify({ id: "123", fullName: "X" }), JSON.stringify({ id: UUID, fullName: "" })];
+      var bad = cases.filter(function (raw) {
+        var st = playerStorage(raw);
+        return D.readPlayer(st) !== null || (raw !== null && st.has());
+      });
+      var good = D.readPlayer(playerStorage(JSON.stringify({ id: UUID, fullName: "Nguyễn Văn An" })));
+      var ok = bad.length === 0 && good && good.id === UUID && good.fullName === "Nguyễn Văn An";
+      return { ok: ok, detail: "5 giá trị hỏng coi như chưa có và bị xoá: " + (bad.length === 0) + "; giá trị hợp lệ đọc đúng: " + !!good };
+    });
+
+    /* Bộ hẹn giờ giả cho luồng người chơi */
+    function FakeTimers() {
+      var seq = 0, list = {};
+      return {
+        setTimer: function (fn, ms) { seq++; list[seq] = { fn: fn, ms: ms }; return seq; },
+        clearTimer: function (id) { delete list[id]; },
+        fireAll: function () { Object.keys(list).forEach(function (id) { var t = list[id]; delete list[id]; t.fn(); }); },
+        delays: function () { return Object.keys(list).map(function (id) { return list[id].ms; }); }
+      };
+    }
+    function fakeResponse(status, body) {
+      return { status: status, ok: status >= 200 && status < 300, json: function () { return Promise.resolve(body || {}); } };
+    }
+
+    var asyncTests = [];
+    function testAsync(id, name, fn) { asyncTests.push({ id: id, name: name, fn: fn }); }
+
+    testAsync("UT-15", "Mở game (BOOT) với fetch giả", function () {
+      var stored = JSON.stringify({ id: UUID, fullName: "An" });
+      function run(fetchImpl, timers) {
+        var st = playerStorage(stored);
+        timers = timers || FakeTimers();
+        var flow = D.createPlayerFlow({ fetch: fetchImpl, storage: st, setTimer: timers.setTimer, clearTimer: timers.clearTimer });
+        var p = flow.boot();
+        return { p: p.then(function (state) { return { state: state, kept: st.has() }; }), timers: timers };
+      }
+      var r200 = run(function () { return Promise.resolve(fakeResponse(200, { id: UUID, fullName: "An Nguyễn" })); }).p;
+      var r404 = run(function () { return Promise.resolve(fakeResponse(404)); }).p;
+      var r503 = run(function () { return Promise.resolve(fakeResponse(503)); }).p;
+      var rNet = run(function () { return Promise.reject(new TypeError("Failed to fetch")); }).p;
+      var hang = run(function () { return new Promise(function () {}); });
+      var delays = hang.timers.delays();
+      hang.timers.fireAll(); // tới mốc BOOT_TIMEOUT_MS
+      return Promise.all([r200, r404, r503, rNet, hang.p]).then(function (rs) {
+        var exp = [["IDLE", true], ["REGISTER", false], ["IDLE", true], ["IDLE", true], ["IDLE", true]];
+        var ok = rs.every(function (r, i) { return r.state === exp[i][0] && r.kept === exp[i][1]; }) &&
+          delays.length === 1 && delays[0] === C.BOOT_TIMEOUT_MS;
+        return { ok: ok, detail: "200/404/503/lỗi mạng/quá giờ → " + rs.map(function (r) { return r.state + (r.kept ? "" : " (đã xoá khoá)"); }).join(", ") + "; chờ tối đa " + delays[0] + " ms" };
+      });
+    });
+
+    testAsync("UT-16", "Gửi đăng ký 5 lần khi lần đầu chưa trả lời", function () {
+      var calls = 0, resolveFirst;
+      var flow = D.createPlayerFlow({
+        fetch: function () { calls++; return new Promise(function (r) { resolveFirst = r; }); },
+        storage: playerStorage(null),
+        setTimer: FakeTimers().setTimer,
+        clearTimer: function () {}
+      });
+      return flow.boot().then(function () {
+        var v = { fullName: "Nguyễn Văn An", email: "an@gmail.com", phone: "0912345678", consent: true };
+        for (var i = 0; i < 5; i++) flow.submit(v);
+        var tick = function () { return new Promise(function (r) { setTimeout(r, 0); }); };
+        var sent;
+        return tick().then(function () {
+          sent = calls;
+          resolveFirst(fakeResponse(201, { id: UUID, fullName: "Nguyễn Văn An" }));
+          return tick();
+        }).then(function () {
+          return { ok: sent === 1 && flow.state === "IDLE", detail: "fetch được gọi " + sent + " lần; trạng thái sau khi server trả lời: " + flow.state };
+        });
+      });
+    });
+
+    function runAsyncTests() {
+      return asyncTests.reduce(function (p, t) {
+        return p.then(function () {
+          return Promise.resolve().then(t.fn).then(function (r) {
+            results.push({ id: t.id, name: t.name, ok: r.ok, detail: r.detail || "" });
+          }, function (e) {
+            results.push({ id: t.id, name: t.name, ok: false, detail: "Lỗi: " + e.message });
+          });
+        });
+      }, Promise.resolve());
+    }
+
     /* ---------- Hiển thị ---------- */
+    runAsyncTests().then(render);
+    function render() {
     var rows = document.getElementById("rows");
     var pass = 0;
     results.forEach(function (r) {
@@ -327,6 +477,7 @@
     });
     document.getElementById("summary").textContent = "Đạt " + pass + "/" + results.length + " ca.";
     window.__UT_RESULTS__ = results;
+    }
   })();
   </script>
 </body>

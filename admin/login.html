@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Đăng nhập · Đập Tôi · Quản trị</title>
+  <link rel="stylesheet" href="../design/tokens.css">
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body data-page="login">
+  <header class="topbar">
+    <span class="topbar__brand">Đập Tôi · Quản trị</span>
+  </header>
+
+  <!-- A1 · Đăng nhập admin -->
+  <main class="center">
+    <form id="login-form" class="card login" novalidate>
+      <h1 class="card__title">Đăng nhập</h1>
+      <p id="login-notice" class="notice" role="status" hidden></p>
+      <div class="field">
+        <label class="field__label" for="login-username">Tên đăng nhập</label>
+        <input class="field__input" id="login-username" name="username" type="text" autocomplete="username" required>
+      </div>
+      <div class="field">
+        <label class="field__label" for="login-password">Mật khẩu</label>
+        <input class="field__input" id="login-password" name="password" type="password" autocomplete="current-password" required>
+      </div>
+      <p id="login-error" class="form-error" role="alert" hidden></p>
+      <button id="btn-login" class="btn btn--primary btn--block" type="submit">Đăng nhập</button>
+    </form>
+  </main>
+
+  <script src="admin.js"></script>
+</body>
+</html>

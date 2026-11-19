@@ -23,7 +23,11 @@
     HIT_FX_MS: 300,                   // hiệu ứng "bị đập" và "+1"
     STORAGE_KEY: "dapToi.highScore",  // khoá localStorage
     HIGH_SCORE_MAX: 9999,             // kỷ lục > giá trị này coi là hỏng
-    ANNOUNCE_SECONDS: [10, 5]         // đồng hồ chỉ đọc cho trình đọc màn hình ở các mốc này
+    ANNOUNCE_SECONDS: [10, 5],        // đồng hồ chỉ đọc cho trình đọc màn hình ở các mốc này
+    // Đăng ký người chơi (04 · mục 18)
+    PLAYER_KEY: "dapToi.player",      // khoá localStorage ghi nhớ người chơi
+    BOOT_TIMEOUT_MS: 3000,            // chờ server xác nhận người chơi khi mở game
+    SUBMIT_TIMEOUT_MS: 15000          // chờ server trả lời khi gửi đăng ký
   });
 
   var MS_PER_SECOND = 1000;
@@ -354,9 +358,17 @@
       }
     }
 
+    var screens = {
+      boot: $("screen-boot"),
+      register: $("screen-register"),
+      start: el.screenStart,
+      play: el.screenPlay
+    };
+
     function showScreen(name) {
-      el.screenStart.hidden = name !== "start";
-      el.screenPlay.hidden = name !== "play";
+      Object.keys(screens).forEach(function (k) {
+        if (screens[k]) screens[k].hidden = k !== name;
+      });
     }
 
     function renderBest() {
@@ -451,8 +463,20 @@
     });
 
     renderBest();
-    showScreen("start");
-    el.btnStart.focus();
+
+    // Cho phần đăng ký người chơi (player.js) điều khiển màn hình S0 / S1
+    global.DapToi.ui = {
+      showScreen: showScreen,
+      renderBest: renderBest,
+      focusStart: function () { el.btnStart.focus(); }
+    };
+
+    if (screens.boot) {
+      showScreen("boot");               // player.js quyết định S0 hay S1 (04 · mục 11)
+    } else {
+      showScreen("start");
+      el.btnStart.focus();
+    }
 
     return engine;
   }

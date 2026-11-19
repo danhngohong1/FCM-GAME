@@ -1,19 +1,20 @@
-# Chỉ cần package.json, server.js, app/, design/, assets/ trong image
+# Image chỉ cần: package*.json, server.js, server/, app/, admin/, design/, assets/
 .git
 .gitignore
 .claude
 .dockerignore
+.env
+.env.*
 Dockerfile
-compose.yaml
+compose*.yaml
 docker-compose*.yml
 node_modules
 npm-debug.log*
 docs
+test
 app/test.html
 DanhNH.png
 *.md
-.env
-.env.*
 .vscode
 .idea
 Thumbs.db
