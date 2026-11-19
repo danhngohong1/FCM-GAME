@@ -210,6 +210,27 @@ sudo sysctl --system</code></pre>
   <h2 id="cac-buoc"><span class="num">5</span>Các bước deploy &amp; kiểm tra</h2>
   <p>Làm tuần tự; bước nào kiểm tra không đạt thì dừng, không làm bước sau. Thay <code>PROJECT_ID</code> bằng mã project của bạn — <strong>đã tạo: <code>dap-toi-game</code></strong> (bước 1 và 2 đã xong ngày 19/11/2026). Các tên dùng thống nhất: máy <code>dap-toi-vm</code>, IP <code>dap-toi-ip</code>, zone <code>us-central1-a</code>.</p>
 
+  <div class="callout"><p><strong>Tiến độ · cập nhật 19/11/2026: đã chạy thật tại <a href="https://fptelecom.io.vn">https://fptelecom.io.vn</a>.</strong> Bước 1–12 đạt; bước 13–14 còn chờ.</p></div>
+  <div class="table-wrap"><table>
+    <thead><tr><th class="id">Bước</th><th>Trạng thái</th><th>Kết quả thực tế</th></tr></thead>
+    <tbody>
+      <tr><td class="id">1–3</td><td><strong>Đạt</strong></td><td>Project <code>dap-toi-game</code>, billing đã gắn, ngân sách 130.000 ₫/tháng, bật <code>compute.googleapis.com</code>.</td></tr>
+      <tr><td class="id">4–6</td><td><strong>Đạt</strong></td><td>IP tĩnh <code>34.55.233.165</code>; tường lửa còn đúng 4 luật (<code>allow-web</code>, <code>allow-ssh-iap</code>, <code>default-allow-internal</code>, <code>default-allow-icmp</code>); máy <code>e2-micro</code> Debian 12, đĩa <code>pd-standard</code> 30 GB, không gắn service account.</td></tr>
+      <tr><td class="id">7–8</td><td><strong>Đạt</strong></td><td>Swap 2 GB, swappiness 10 (có trong <code>/etc/fstab</code>); unattended-upgrades bật; Docker 29.10, Compose 5.8.</td></tr>
+      <tr><td class="id">9</td><td><strong>Đạt</strong></td><td>Code ở <code>~/dap-toi</code>; <code>.env</code> tạo trên máy chủ bằng mật khẩu ngẫu nhiên (admin 24 ký tự, DB 32 ký tự), quyền <code>-rw-------</code>. Mật khẩu không in ra; xem bằng <code>grep ADMIN_ ~/dap-toi/.env</code> qua SSH.</td></tr>
+      <tr><td class="id">10</td><td><strong>Đạt</strong></td><td>DNS tại Mắt Bão (<code>ns1/ns2.matbao.vn</code>): <code>@</code> và <code>www</code> → <code>34.55.233.165</code>, kiểm tra qua 8.8.8.8 và 1.1.1.1; không có <code>AAAA</code>.</td></tr>
+      <tr><td class="id">11</td><td><strong>Đạt</strong></td><td>3 dịch vụ <code>Up</code> (<code>app</code>, <code>db</code> healthy), restart <code>unless-stopped</code>; Caddy lấy chứng chỉ Let's Encrypt cho cả 2 tên. RAM: app 32 MB/192, db 45 MB/256, caddy 44 MB/64; máy còn ~385 MB trống, swap gần như chưa dùng; đĩa dùng 20%.</td></tr>
+      <tr><td class="id">12</td><td><strong>Đạt</strong></td><td>HTTP → <code>308</code>; <code>/</code> → <code>302</code> sang <code>/app/</code> có HSTS 1 năm; <code>www</code> → <code>301</code> về tên chính; <code>/admin/</code> → trang đăng nhập; <code>/app/test.html</code> → <code>404</code>; cổng 3000, 5432, 22 đóng từ Internet. Trang game tải được, Console không lỗi.</td></tr>
+      <tr><td class="id">13</td><td>Chờ</td><td>Chưa chạy các ca P1 trên bản thật (chưa đăng ký thử để tránh dữ liệu rác).</td></tr>
+      <tr><td class="id">14</td><td>Chờ</td><td>Xem Billing → Reports sau 24–48 giờ (từ 20–21/11/2026).</td></tr>
+    </tbody>
+  </table></div>
+  <div class="callout warn"><p><strong>Lưu ý khi SSH từ Windows:</strong> <code>gcloud compute ssh</code> dùng PuTTY (plink) và bị dừng ở câu hỏi host key. Cách đã dùng: mở đường hầm IAP rồi SSH bằng OpenSSH của Windows.</p>
+<pre><code>gcloud compute start-iap-tunnel dap-toi-vm 22 --local-host-port=localhost:2222 --zone=us-central1-a
+ssh -i $env:USERPROFILE\.ssh\google_compute_engine -p 2222 -o UserKnownHostsFile=$env:USERPROFILE\.ssh\google_compute_known_hosts -o HostKeyAlias=dap-toi-vm TEN_OS_LOGIN@localhost</code></pre>
+  <p><code>TEN_OS_LOGIN</code> là tên OS Login của bạn (email Google, thay <code>@</code> và <code>.</code> bằng <code>_</code>); xem bằng <code>gcloud compute os-login describe-profile --format="value(posixAccounts[0].username)"</code>.</p>
+  <p>Theo dõi: Caddy dùng ~68% giới hạn 64 MB; nếu bị khởi động lại vì hết RAM, nâng lên 96 MB trong <code>compose.prod.yaml</code>.</p></div>
+
   <h3>5.1 Chuẩn bị tài khoản (trên máy Windows)</h3>
   <div class="table-wrap"><table>
     <thead><tr><th class="id">Bước</th><th>Việc làm</th><th>Kiểm tra</th><th>Đạt khi</th></tr></thead>
