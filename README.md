@@ -52,6 +52,8 @@ docker compose -f compose.yaml -f compose.prod.yaml up -d --build
 
 Cần trỏ bản ghi DNS `A` của tên miền về IP máy chủ trước khi chạy. Thử trên máy cá nhân: đặt `SITE_DOMAIN=localhost` rồi mở https://localhost (chứng chỉ nội bộ của Caddy, trình duyệt sẽ cảnh báo). Kế hoạch đầy đủ: `docs/06-ke-hoach-deploy.html`.
 
+Đổi mật khẩu admin trên máy chủ: chạy `bash ~/dap-toi/scripts/doi-mat-khau-admin.sh` (cần SSH có `-t`). Script hỏi mật khẩu ẩn 2 lần, cập nhật `.env`, khởi động lại `app` và đăng xuất mọi phiên admin cũ.
+
 ## Kiểm thử
 
 | Loại | Cách chạy |
